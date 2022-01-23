@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "mcserverapi",
+  "version": "${version}",
+
+  "name": "MCServerAPI",
+  "description": "LCLPNetwork integration for Minecraft Fabric servers.",
+  "authors": [
+    "LCLP"
+  ],
+
+  "license": "MIT",
+  "icon": "assets/mcserverapi/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "server": [
+      "work.lclpnet.serverimpl.fabric.MCServerFabric"
+    ]
+  },
+  "mixins": [
+    "mcserverapi.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.12.12",
+    "minecraft": "1.16.x"
+  },
+  "suggests": {}
+}
