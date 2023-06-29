@@ -1,34 +1,28 @@
+import work.lclpnet.build.task.GithubDeploymentTask
+
 plugins {
-    id 'fabric-loom'
+    id 'java'
+    id 'fabric-loom' version '1.2.7'
     id 'maven-publish'
-    id 'gradle-build-utils'
+    id 'gradle-build-utils' version '1.5.3'
+    id 'kibu-plugin-dev' version '0.5.1'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
-Properties props = loadProperties.call('publish.properties')
+Properties props = buildUtils.loadProperties('publish.properties')
 
-sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
 
-archivesBaseName = project.archives_base_name
-version = gitVersion.call()
 group = project.maven_group
+version = buildUtils.gitVersion()
+archivesBaseName = project.archives_base_name
 
 repositories {
     mavenCentral()
 
     maven {
         url "https://repo.lclpnet.work/repository/internal"
-    }
-
-    maven {
-        if (!Arrays.stream("mavenHost", "mavenUser", "mavenPassword").allMatch(props.&containsKey)) {
-            throw new IllegalStateException('Publish properties must contain values for "mavenPassword", "mavenHost" and "mavenUser".')
-        }
-        credentials {
-            username props.getProperty('mavenUser')
-            password props.getProperty('mavenPassword')
-        }
-        url props.getProperty('mavenHost')
     }
 }
 
@@ -37,87 +31,103 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    implementation "work.lclpnet:lclpnetwork-api:${project.lclpnetwork_api_version}"
-    implementation "work.lclpnet.mcserver-api:mcserver-api-base:${project.mcserver_api_version}"
-    implementation "work.lclpnet:lclpstorage:${project.lclpstorage_version}"
-    implementation "work.lclpnet:translations:${project.lclptranslations_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    modImplementation "work.lclpnet.mods.kibu:kibu:${project.kibu_version}"
+    modImplementation "work.lclpnet.mods.kibu:kibu-plugins:${project.kibu_plugins_version}"
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    "work.lclpnet:translations4j:${project.translations4j_version}".with {
+        implementation it
+        bundle (it) { transitive = false }
+    }
+
+    "work.lclpnet:lclpnetwork-api:${project.lclpnetwork_api_version}".with {
+        implementation it
+        bundle (it) { transitive = false }
+    }
+
+    "work.lclpnet:lclpstorage:${project.lclpstorage_version}".with {
+        implementation it
+        bundle (it) { transitive = false }
+    }
+
+    implementation "work.lclpnet.mcserver-api:mcserver-api-base:${project.mcserver_api_base_version}"
+
+    // test dependencies
+    testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
+}
+
+loom {
+    serverOnlyMinecraftJar()
+
+    runs {
+        remove client
+    }
 }
 
 test {
     useJUnitPlatform()
+    systemProperty('fabric.side', 'server')
+}
+
+java {
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release.convention(17)
 }
 
 processResources {
+    // replace placeholders in resources
     inputs.property "version", project.version
 
-    filesMatching("fabric.mod.json") {
+    filesMatching("plugin.json") {
         expand "version": project.version
     }
 }
 
-tasks.withType(JavaCompile).configureEach {
-    it.options.encoding = "UTF-8"
-
-    // The Minecraft launcher currently installs Java 8 for users, so your mod probably wants to target Java 8 too
-    // JDK 9 introduced a new way of specifying this that will make sure no newer classes or methods are used.
-    // We'll use that if it's available, but otherwise we'll use the older option.
-    def targetVersion = 8
-    if (JavaVersion.current().isJava9Compatible()) {
-        it.options.release.set(targetVersion)
-    }
+shadowJar {
+    mergeServiceFiles()
 }
 
-java {
-    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task if it is present
-    withSourcesJar()
-}
-
-jar {
-    from("LICENSE.md") {
+[jar, shadowJar].each {
+    it.from("LICENSE.md") {
         rename { "${it}_${project.archivesBaseName}"}
     }
 }
 
-// configure the maven publication
+def env = System.getenv()
+
+tasks.register("github", GithubDeploymentTask) {
+    dependsOn tasks.shadowJar
+
+    config {
+        token = env.get("GITHUB_TOKEN")
+        repository = env.get("GITHUB_REPOSITORY")
+    }
+
+    release {
+        title = "[$project.minecraft_version] $project.name $project.version"
+        tag = buildUtils.latestTag()
+    }
+
+    assets.add(tasks.shadowJar.archiveFile.get())
+}
+
 publishing {
+    buildUtils.setupPublishRepository(repositories, props)
+
     publications {
         mavenJava(MavenPublication) {
             artifactId = project.archives_base_name
 
-            artifact(remapJar) {
-                builtBy remapJar
-            }
-            artifact(sourcesJar) {
-                builtBy remapSourcesJar
-            }
+            artifact shadowJar
+            artifact jar
+            artifact sourcesJar
 
             pom {
-                name = 'LCLPMMO'
-                description = 'A mod that adds MMO RPG content to Minecraft. Indended to be used on LCLPServer 5.0'
-            }
-        }
-    }
-
-    repositories {
-        maven {
-            def env = System.getenv()
-            if (Arrays.stream("DEPLOY_URL", "DEPLOY_USER", "DEPLOY_PASSWORD").allMatch(env.&containsKey)) {
-                credentials {
-                    username env.get("DEPLOY_USER")
-                    password env.get("DEPLOY_PASSWORD")
-                }
-                url env.get("DEPLOY_URL")
-            } else if (Arrays.stream("mavenHost", "mavenUser", "mavenPassword").allMatch(props.&containsKey)) {
-                credentials {
-                    username props.getProperty('mavenUser')
-                    password props.getProperty('mavenPassword')
-                }
-                url props.getProperty('mavenHost')
-            } else {
-                url "file:///${project.projectDir}/repo"
+                name = 'MCServer Kibu Implementation'
+                description = 'A Java library to manage Minecraft server backend interaction with LCLPNetwork. For Fabric/Kibu.'
             }
         }
     }

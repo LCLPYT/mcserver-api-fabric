@@ -10,11 +10,7 @@ pluginManagement {
         }
         gradlePluginPortal()
     }
-    plugins {
-        id 'fabric-loom' version '0.9-SNAPSHOT'
-        id 'gradle-build-utils' version '1.1.0'
-    }
 }
 
-rootProject.name = 'MCServerAPI-Fabric'
+rootProject.name = 'mcserver-api-kibu'
 
