@@ -1,21 +1,25 @@
 package work.lclpnet.serverimpl.kibu;
 
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.server.MinecraftServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.kibu.plugin.KibuPlugin;
+import work.lclpnet.mplugins.ext.WorldStateListener;
 import work.lclpnet.serverapi.msg.ServerTranslations;
 import work.lclpnet.serverapi.util.ServerCache;
 import work.lclpnet.serverapi.util.ServerContext;
+import work.lclpnet.serverimpl.kibu.cmd.KibuCommands;
 import work.lclpnet.serverimpl.kibu.config.ConfigManager;
 import work.lclpnet.serverimpl.kibu.event.MCServerListener;
 import work.lclpnet.serverimpl.kibu.net.NetworkHandler;
+import work.lclpnet.serverimpl.kibu.util.KibuPlatformBridge;
 import work.lclpnet.serverimpl.kibu.util.KibuSPITranslationLoader;
 import work.lclpnet.serverimpl.kibu.util.KibuServerTranslation;
 
 import java.nio.file.Path;
 
-public class MCServerKibuPlugin extends KibuPlugin implements MCServerKibu, ServerContext {
+public class MCServerKibuPlugin extends KibuPlugin implements MCServerKibu, ServerContext, WorldStateListener {
 
     public static final String ID = "mcserver-api";
     private static final Logger logger = LoggerFactory.getLogger(ID);
@@ -23,13 +27,14 @@ public class MCServerKibuPlugin extends KibuPlugin implements MCServerKibu, Serv
     private KibuServerTranslation translations = null;
     private NetworkHandler networkHandler = null;
     private ServerCache serverCache = null;
+    private ConfigManager configManager = null;
 
     @Override
     protected void loadKibuPlugin() {
         instance = this;
 
         final Path configFile = FabricLoader.getInstance().getConfigDir().resolve(ID).resolve("config.json");
-        final ConfigManager configManager = new ConfigManager(configFile, logger);
+        configManager = new ConfigManager(configFile, logger);
 
         configManager.init();
 
@@ -42,6 +47,20 @@ public class MCServerKibuPlugin extends KibuPlugin implements MCServerKibu, Serv
         loadTranslations(serverCache);
 
         registerHooks(new MCServerListener(serverCache, configManager, logger));
+    }
+
+    @Override
+    public void onWorldReady() {
+        final MinecraftServer server = getEnvironment().getServer();
+        final KibuPlatformBridge platformBridge = new KibuPlatformBridge(server.getPlayerManager(), translations, logger);
+
+        new KibuCommands(networkHandler.getApi().orElse(null), platformBridge, this, configManager)
+                .register(this);
+    }
+
+    @Override
+    public void onWorldUnready() {
+
     }
 
     private void loadTranslations(ServerCache cache) {

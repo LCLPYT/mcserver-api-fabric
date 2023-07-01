@@ -33,9 +33,13 @@ public class KibuPlatformBridge implements IPlatformBridge {
             return;
         }
 
-        Text message = messageSerializer.convert(msg, player);
+        Text message = convertMessage(msg, player);
 
         player.sendMessage(message);
+    }
+
+    public Text convertMessage(MCMessage msg, ServerPlayerEntity player) {
+        return messageSerializer.convert(msg, player);
     }
 
     @Override

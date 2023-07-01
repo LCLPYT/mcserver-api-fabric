@@ -30,7 +30,6 @@ public class KibuMCMessageImpl {
         MCMessage.MessageStyle style = switch (msg.getColorMode()) {
             case INHERIT -> parentStyle != null ? parentStyle : msg.getStyle();
             case LOCAL -> msg.getStyle();
-            default -> throw new IllegalStateException("Color mode not implemented: " + msg.getColorMode());
         };
 
         if (!msg.isTextNode()) {
@@ -74,8 +73,8 @@ public class KibuMCMessageImpl {
         MCMessage.MessageColor color = messageStyle.getColor();
         if (color != null) {
             int rgb = 0x000000;
-            rgb |= MathHelper.clamp(color.red, 0, 255) << 4;
-            rgb |= MathHelper.clamp(color.green, 0, 255) << 2;
+            rgb |= MathHelper.clamp(color.red, 0, 255) << 16;
+            rgb |= MathHelper.clamp(color.green, 0, 255) << 8;
             rgb |= MathHelper.clamp(color.blue, 0, 255);
 
             style = style.withColor(TextColor.fromRgb(rgb));
