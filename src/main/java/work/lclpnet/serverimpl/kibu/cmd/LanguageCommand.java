@@ -10,7 +10,9 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import work.lclpnet.kibu.plugin.cmd.CommandRegistrar;
 import work.lclpnet.serverapi.MCServerAPI;
 import work.lclpnet.serverapi.cmd.LanguageCommandScheme;
+import work.lclpnet.serverapi.util.ServerCache;
 import work.lclpnet.serverapi.util.ServerContext;
+import work.lclpnet.serverimpl.kibu.cmd.arg.LanguageSuggestionProvider;
 import work.lclpnet.serverimpl.kibu.config.ConfigAccess;
 import work.lclpnet.serverimpl.kibu.util.KibuPlatformBridge;
 
@@ -28,9 +30,12 @@ public class LanguageCommand extends PlatformCommand<Boolean> implements Languag
     }
 
     private LiteralArgumentBuilder<ServerCommandSource> command(String name) {
+        final ServerCache cache = getContext().getCache();
+
         return CommandManager.literal(name)
                 .executes(this::getLanguage)
                 .then(CommandManager.argument("language", StringArgumentType.word())
+                        .suggests(new LanguageSuggestionProvider(cache))
                         .executes(this::setLanguage));
     }
 

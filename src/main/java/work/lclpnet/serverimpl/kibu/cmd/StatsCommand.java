@@ -15,6 +15,7 @@ import work.lclpnet.serverapi.MCServerAPI;
 import work.lclpnet.serverapi.cmd.StatsCommandScheme;
 import work.lclpnet.serverapi.msg.MCMessage;
 import work.lclpnet.serverapi.util.ServerContext;
+import work.lclpnet.serverimpl.kibu.cmd.arg.PlayerNameSuggestionProvider;
 import work.lclpnet.serverimpl.kibu.config.ConfigAccess;
 import work.lclpnet.serverimpl.kibu.util.KibuPlatformBridge;
 
@@ -37,6 +38,7 @@ public class StatsCommand extends PlatformCommand<Boolean> implements StatsComma
         return CommandManager.literal(getName())
                 .executes(this::showOwnStats)
                 .then(CommandManager.argument("player", StringArgumentType.word())
+                        .suggests(PlayerNameSuggestionProvider.getInstance())
                         .executes(this::showStats));
     }
 
