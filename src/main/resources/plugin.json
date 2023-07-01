@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "version": "${version}",
   "id": "mcserver-api",
-  "entry": "work.lclpnet.serverimpl.kibu.MCServerKibu",
+  "entry": "work.lclpnet.serverimpl.kibu.MCServerKibuPlugin",
   "dependsOn": [],
   "fabric": {
     "env": ["server"],

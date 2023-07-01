@@ -1,11 +1,18 @@
 package work.lclpnet.serverimpl.kibu;
 
-import work.lclpnet.kibu.plugin.KibuPlugin;
+import work.lclpnet.serverapi.util.ServerContext;
+import work.lclpnet.serverimpl.kibu.net.NetworkHandler;
+import work.lclpnet.serverimpl.kibu.util.KibuServerTranslation;
 
-public class MCServerKibu extends KibuPlugin {
+public interface MCServerKibu {
 
-    @Override
-    protected void loadKibuPlugin() {
+    NetworkHandler getNetworkHandler();
 
+    ServerContext getServerContext();
+
+    KibuServerTranslation getTranslations();
+
+    static MCServerKibu getInstance() {
+        return MCServerKibuPlugin.getInstance();
     }
 }

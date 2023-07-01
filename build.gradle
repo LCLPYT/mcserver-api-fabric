@@ -35,6 +35,15 @@ dependencies {
     modImplementation "work.lclpnet.mods.kibu:kibu:${project.kibu_version}"
     modImplementation "work.lclpnet.mods.kibu:kibu-plugins:${project.kibu_plugins_version}"
 
+    implementation 'org.json:json:20230227'
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+
+    // bundle these dependencies
+    'work.lclpnet:json-config4j:1.0.0'.with {
+        implementation it
+        bundle (it) { transitive = false }
+    }
+
     "work.lclpnet:translations4j:${project.translations4j_version}".with {
         implementation it
         bundle (it) { transitive = false }
