@@ -18,7 +18,7 @@ public class KibuMCMessageImpl {
         this.translations = translations;
     }
 
-    public Text convert(MCMessage msg, ServerPlayerEntity receiver) {
+    public MutableText convert(MCMessage msg, ServerPlayerEntity receiver) {
         MutableText root = Text.empty();
 
         append(root, msg, null, receiver);

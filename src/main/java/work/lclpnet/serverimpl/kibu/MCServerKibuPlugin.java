@@ -13,9 +13,7 @@ import work.lclpnet.serverimpl.kibu.cmd.KibuCommands;
 import work.lclpnet.serverimpl.kibu.config.ConfigManager;
 import work.lclpnet.serverimpl.kibu.event.MCServerListener;
 import work.lclpnet.serverimpl.kibu.net.NetworkHandler;
-import work.lclpnet.serverimpl.kibu.util.KibuPlatformBridge;
-import work.lclpnet.serverimpl.kibu.util.KibuSPITranslationLoader;
-import work.lclpnet.serverimpl.kibu.util.KibuServerTranslation;
+import work.lclpnet.serverimpl.kibu.util.*;
 
 import java.nio.file.Path;
 
@@ -28,6 +26,8 @@ public class MCServerKibuPlugin extends KibuPlugin implements MCServerKibu, Serv
     private NetworkHandler networkHandler = null;
     private ServerCache serverCache = null;
     private ConfigManager configManager = null;
+    private final StatsManager statsManager = new StatsManager();
+    private StatsDisplay statsDisplay = null;
 
     @Override
     protected void loadKibuPlugin() {
@@ -46,7 +46,9 @@ public class MCServerKibuPlugin extends KibuPlugin implements MCServerKibu, Serv
 
         loadTranslations(serverCache);
 
-        registerHooks(new MCServerListener(serverCache, configManager, logger));
+        statsDisplay = new StatsDisplay(translations, statsManager, logger);
+
+        registerHooks(new MCServerListener(serverCache, configManager, statsManager, statsDisplay, logger));
     }
 
     @Override
@@ -54,7 +56,7 @@ public class MCServerKibuPlugin extends KibuPlugin implements MCServerKibu, Serv
         final MinecraftServer server = getEnvironment().getServer();
         final KibuPlatformBridge platformBridge = new KibuPlatformBridge(server.getPlayerManager(), translations, logger);
 
-        new KibuCommands(networkHandler.getApi().orElse(null), platformBridge, this, configManager)
+        new KibuCommands(networkHandler.getApi().orElse(null), platformBridge, this, configManager, translations, statsManager, statsDisplay)
                 .register(this);
     }
 

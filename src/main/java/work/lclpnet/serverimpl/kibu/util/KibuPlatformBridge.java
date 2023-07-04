@@ -2,6 +2,7 @@ package work.lclpnet.serverimpl.kibu.util;
 
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.slf4j.Logger;
 import work.lclpnet.serverapi.msg.MCMessage;
@@ -38,7 +39,7 @@ public class KibuPlatformBridge implements IPlatformBridge {
         player.sendMessage(message);
     }
 
-    public Text convertMessage(MCMessage msg, ServerPlayerEntity player) {
+    public MutableText convertMessage(MCMessage msg, ServerPlayerEntity player) {
         return messageSerializer.convert(msg, player);
     }
 
