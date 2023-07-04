@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import work.lclpnet.serverapi.msg.MCMessage;
 import work.lclpnet.serverapi.util.IPlatformBridge;
 import work.lclpnet.serverapi.util.MojangAPI;
+import work.lclpnet.translate.TranslationService;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -18,7 +19,7 @@ public class KibuPlatformBridge implements IPlatformBridge {
     private final Logger logger;
     private final KibuMCMessageImpl messageSerializer;
 
-    public KibuPlatformBridge(PlayerManager playerManager, KibuServerTranslation translations, Logger logger) {
+    public KibuPlatformBridge(PlayerManager playerManager, TranslationService translations, Logger logger) {
         this.playerManager = playerManager;
         this.logger = logger;
         this.messageSerializer = new KibuMCMessageImpl(translations);

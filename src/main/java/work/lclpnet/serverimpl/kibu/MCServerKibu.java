@@ -2,7 +2,7 @@ package work.lclpnet.serverimpl.kibu;
 
 import work.lclpnet.serverapi.util.ServerContext;
 import work.lclpnet.serverimpl.kibu.net.NetworkHandler;
-import work.lclpnet.serverimpl.kibu.util.KibuServerTranslation;
+import work.lclpnet.translate.TranslationService;
 
 public interface MCServerKibu {
 
@@ -10,7 +10,7 @@ public interface MCServerKibu {
 
     ServerContext getServerContext();
 
-    KibuServerTranslation getTranslations();
+    TranslationService getTranslationService();
 
     static MCServerKibu getInstance() {
         return MCServerKibuPlugin.getInstance();

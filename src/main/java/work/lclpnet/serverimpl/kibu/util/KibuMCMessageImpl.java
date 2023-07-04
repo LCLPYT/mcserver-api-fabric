@@ -7,14 +7,15 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.math.MathHelper;
 import work.lclpnet.serverapi.msg.MCMessage;
+import work.lclpnet.translate.TranslationService;
 
 import java.util.List;
 
 public class KibuMCMessageImpl {
 
-    private final KibuServerTranslation translations;
+    private final TranslationService translations;
 
-    protected KibuMCMessageImpl(KibuServerTranslation translations) {
+    protected KibuMCMessageImpl(TranslationService translations) {
         this.translations = translations;
     }
 
@@ -40,25 +41,23 @@ public class KibuMCMessageImpl {
             return;
         }
 
-        final String content;
+        final Style mcStyle = convert(style);
+        final Text text;
 
         if (msg instanceof MCMessage.MCTranslationMessage translationMsg) {
             List<MCMessage> substituteList = translationMsg.getSubstitutes();
-            String[] substitutes = new String[substituteList.size()];
+            Text[] substitutes = new Text[substituteList.size()];
 
             for (int i = 0; i < substituteList.size(); i++) {
                 MCMessage subMsg = substituteList.get(i);
-                substitutes[i] = subMsg.getText();  // TODO replace with convert(subMsg) and replace accordingly
+                substitutes[i] = convert(subMsg, receiver);
             }
 
-            content = translations.translate(receiver, translationMsg.getText(), (Object[]) substitutes);
+            text = translations.translateText(receiver, translationMsg.getText(), (Object[]) substitutes)
+                    .setStyle(mcStyle);
         } else {
-            content = msg.getText();
+            text = Text.literal(msg.getText()).setStyle(mcStyle);
         }
-
-        Style mcStyle = convert(style);
-
-        MutableText text = Text.literal(content).setStyle(mcStyle);
 
         parent.append(text);
     }

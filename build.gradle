@@ -1,3 +1,4 @@
+import net.fabricmc.loom.task.RemapJarTask
 import work.lclpnet.build.task.GithubDeploymentTask
 
 plugins {
@@ -5,7 +6,7 @@ plugins {
     id 'fabric-loom' version '1.2.7'
     id 'maven-publish'
     id 'gradle-build-utils' version '1.5.3'
-    id 'kibu-plugin-dev' version '0.5.1'
+    id 'kibu-plugin-dev' version '0.6.1'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
@@ -23,6 +24,15 @@ repositories {
 
     maven {
         url "https://repo.lclpnet.work/repository/internal"
+    }
+}
+
+sourceSets {
+    translate
+
+    main {
+        // make translate classes available in the main sourceSet
+        compileClasspath += translate.output
     }
 }
 
@@ -65,6 +75,27 @@ dependencies {
     testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
 }
 
+// add main dependencies to the translate sourceSet
+configurations {
+    translateImplementation.extendsFrom(implementation)
+
+    translateCompileClasspath.extendsFrom(modCompileClasspathMapped)
+    translateRuntimeClasspath.extendsFrom(modCompileClasspathMapped)
+}
+
+// add minecraft dependencies to activity sourceSet (only available after project evaluation)
+afterEvaluate {
+    configurations {
+        translateCompileClasspath.extendsFrom(minecraftNamedCompile)
+        translateRuntimeClasspath.extendsFrom(minecraftNamedRuntime)
+    }
+}
+
+kibu {
+    // add translate sources to the dev plugin loader
+    pluginPaths.from(sourceSets.translate.output)
+}
+
 loom {
     serverOnlyMinecraftJar()
 
@@ -99,7 +130,29 @@ shadowJar {
     mergeServiceFiles()
 }
 
-[jar, shadowJar].each {
+// add translation jar tasks
+tasks.register("translationJar", Jar.class) {
+    description 'Builds the standalone translation api jar.'
+    group 'build'
+    archiveClassifier.set("translate-dev")
+    destinationDirectory.set(new File(buildDir, "devlibs"))
+}
+
+tasks.register('remapTranslationJar', RemapJarTask.class) {
+    dependsOn tasks.translationJar
+
+    description 'Remaps the built translation api jar to intermediary mappings.'
+    group 'fabric'
+    archiveClassifier.set('translate')
+
+    inputFile.convention(tasks.translationJar.archiveFile)
+}
+
+[translationJar, remapTranslationJar].each {
+    tasks.assemble.dependsOn(it)
+}
+
+[jar, sourcesJar, shadowJar, translationJar, remapTranslationJar].each {
     it.from("LICENSE.md") {
         rename { "${it}_${project.archivesBaseName}"}
     }
@@ -130,9 +183,9 @@ publishing {
         mavenJava(MavenPublication) {
             artifactId = project.archives_base_name
 
-            artifact shadowJar
-            artifact jar
-            artifact sourcesJar
+            artifact remapJar
+            artifact remapSourcesJar
+            artifact remapTranslationJar
 
             pom {
                 name = 'MCServer Kibu Implementation'

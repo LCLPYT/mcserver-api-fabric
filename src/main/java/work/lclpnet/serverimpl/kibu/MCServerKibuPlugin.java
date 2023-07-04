@@ -6,14 +6,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.kibu.plugin.KibuPlugin;
 import work.lclpnet.mplugins.ext.WorldStateListener;
+import work.lclpnet.serverapi.MCServerAPI;
 import work.lclpnet.serverapi.msg.ServerTranslations;
 import work.lclpnet.serverapi.util.ServerCache;
 import work.lclpnet.serverapi.util.ServerContext;
-import work.lclpnet.serverimpl.kibu.cmd.KibuCommands;
+import work.lclpnet.serverimpl.kibu.cmd.LanguageCommand;
+import work.lclpnet.serverimpl.kibu.cmd.MCLinkCommand;
+import work.lclpnet.serverimpl.kibu.cmd.StatsCommand;
 import work.lclpnet.serverimpl.kibu.config.ConfigManager;
 import work.lclpnet.serverimpl.kibu.event.MCServerListener;
 import work.lclpnet.serverimpl.kibu.net.NetworkHandler;
-import work.lclpnet.serverimpl.kibu.util.*;
+import work.lclpnet.serverimpl.kibu.service.ServerLanguagePreferenceProvider;
+import work.lclpnet.serverimpl.kibu.util.KibuPlatformBridge;
+import work.lclpnet.serverimpl.kibu.util.KibuSPITranslationLoader;
+import work.lclpnet.serverimpl.kibu.util.StatsDisplay;
+import work.lclpnet.serverimpl.kibu.util.StatsManager;
+import work.lclpnet.translate.TranslationService;
 
 import java.nio.file.Path;
 
@@ -22,7 +30,7 @@ public class MCServerKibuPlugin extends KibuPlugin implements MCServerKibu, Serv
     public static final String ID = "mcserver-api";
     private static final Logger logger = LoggerFactory.getLogger(ID);
     private static MCServerKibuPlugin instance = null;
-    private KibuServerTranslation translations = null;
+    private TranslationService translationService = null;
     private NetworkHandler networkHandler = null;
     private ServerCache serverCache = null;
     private ConfigManager configManager = null;
@@ -44,9 +52,9 @@ public class MCServerKibuPlugin extends KibuPlugin implements MCServerKibu, Serv
         serverCache = new ServerCache();
         networkHandler.getApi().ifPresent(serverCache::init);
 
-        loadTranslations(serverCache);
+        translationService = loadTranslations(serverCache);
 
-        statsDisplay = new StatsDisplay(translations, statsManager, logger);
+        statsDisplay = new StatsDisplay(translationService, statsManager, logger);
 
         registerHooks(new MCServerListener(serverCache, configManager, statsManager, statsDisplay, logger));
     }
@@ -54,10 +62,14 @@ public class MCServerKibuPlugin extends KibuPlugin implements MCServerKibu, Serv
     @Override
     public void onWorldReady() {
         final MinecraftServer server = getEnvironment().getServer();
-        final KibuPlatformBridge platformBridge = new KibuPlatformBridge(server.getPlayerManager(), translations, logger);
+        final KibuPlatformBridge platformBridge = new KibuPlatformBridge(server.getPlayerManager(), translationService, logger);
+        final MCServerAPI api = networkHandler.getApi().orElse(null);
 
-        new KibuCommands(networkHandler.getApi().orElse(null), platformBridge, this, configManager, translations, statsManager, statsDisplay)
-                .register(this);
+        if (api == null) return;
+
+        new LanguageCommand(api, platformBridge, this, configManager).register(this);
+        new MCLinkCommand(api, platformBridge, this, configManager).register(this);
+        new StatsCommand(api, platformBridge, this, configManager, server, statsDisplay).register(this);
     }
 
     @Override
@@ -65,17 +77,20 @@ public class MCServerKibuPlugin extends KibuPlugin implements MCServerKibu, Serv
 
     }
 
-    private void loadTranslations(ServerCache cache) {
-        KibuSPITranslationLoader loader = new KibuSPITranslationLoader();
+    private TranslationService loadTranslations(ServerCache cache) {
+        final KibuSPITranslationLoader loader = new KibuSPITranslationLoader();
+        final ServerTranslations serverTranslations;
 
         try {
-            ServerTranslations serverTranslations = new ServerTranslations(cache, loader);
-
-            translations = new KibuServerTranslation(serverTranslations);
-            translations.init().join();
+            serverTranslations = new ServerTranslations(cache, loader);
+            serverTranslations.reloadTranslations().join();
         } catch (RuntimeException e) {
-            throw new IllegalStateException("Could not initialize translation service", e);
+            throw new IllegalStateException("Could not initialize server translations", e);
         }
+
+        final ServerLanguagePreferenceProvider provider = new ServerLanguagePreferenceProvider(serverTranslations);
+
+        return new TranslationService(serverTranslations.getTranslator(), provider);
     }
 
 
@@ -90,8 +105,8 @@ public class MCServerKibuPlugin extends KibuPlugin implements MCServerKibu, Serv
     }
 
     @Override
-    public KibuServerTranslation getTranslations() {
-        return translations;
+    public TranslationService getTranslationService() {
+        return translationService;
     }
 
     @Override

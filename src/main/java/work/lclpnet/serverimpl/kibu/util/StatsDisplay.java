@@ -16,6 +16,7 @@ import work.lclpnet.kibu.inv.item.ItemStackUtil;
 import work.lclpnet.kibu.inv.type.KibuInventory;
 import work.lclpnet.kibu.inv.type.RestrictedInventory;
 import work.lclpnet.lclpnetwork.facade.MCStats;
+import work.lclpnet.translate.TranslationService;
 import work.lclpnet.translations.Translator;
 
 import java.text.SimpleDateFormat;
@@ -23,11 +24,11 @@ import java.util.*;
 
 public class StatsDisplay {
 
-    private final KibuServerTranslation translations;
+    private final TranslationService translations;
     private final StatsManager statsManager;
     private final Logger logger;
 
-    public StatsDisplay(KibuServerTranslation translations, StatsManager statsManager, Logger logger) {
+    public StatsDisplay(TranslationService translations, StatsManager statsManager, Logger logger) {
         this.translations = translations;
         this.statsManager = statsManager;
         this.logger = logger;
@@ -115,9 +116,7 @@ public class StatsDisplay {
     private ItemStack getBackItem(ServerPlayerEntity viewer) {
         ItemStack stack = new ItemStack(Items.ARROW);
 
-        String content = translations.translate(viewer, "stats.back");
-
-        stack.setCustomName(Text.literal(content).formatted(Formatting.BLUE));
+        stack.setCustomName(translations.translateText(viewer, "stats.back").formatted(Formatting.BLUE));
 
         return stack;
     }
@@ -141,9 +140,7 @@ public class StatsDisplay {
     private ItemStack getNextPageItem(ServerPlayerEntity viewer) {
         ItemStack stack = new ItemStack(Items.EMERALD_BLOCK);
 
-        String content = translations.translate(viewer, "stats.page.next");
-
-        stack.setCustomName(Text.literal(content).formatted(Formatting.GREEN));
+        stack.setCustomName(translations.translateText(viewer, "stats.page.next").formatted(Formatting.GREEN));
 
         return stack;
     }
@@ -151,9 +148,7 @@ public class StatsDisplay {
     private ItemStack getPrevPageItem(ServerPlayerEntity viewer) {
         ItemStack stack = new ItemStack(Items.REDSTONE_BLOCK);
 
-        String content = translations.translate(viewer, "stats.page.prev");
-
-        stack.setCustomName(Text.literal(content).formatted(Formatting.RED));
+        stack.setCustomName(translations.translateText(viewer, "stats.page.prev").formatted(Formatting.RED));
 
         return stack;
     }
@@ -180,15 +175,13 @@ public class StatsDisplay {
         List<Text> lore = new ArrayList<>();
         if (entry.getType() == MCStats.EntryType.GROUP) {
             if (!mainEntry) {
-                String content = translations.translate(viewer, "stats.entry.open_group");
-                lore.add(Text.literal(content).formatted(Formatting.YELLOW));
+                lore.add(translations.translateText(viewer, "stats.entry.open_group").formatted(Formatting.YELLOW));
             }
         } else {
             Map<String, MCStats.Value> properties = entry.getProperties();
 
             if (properties == null) {
-                String content = translations.translate(viewer, "stats.entry.none");
-                lore.add(Text.literal(content).formatted(Formatting.YELLOW, Formatting.ITALIC));
+                lore.add(translations.translateText(viewer, "stats.entry.none").formatted(Formatting.YELLOW, Formatting.ITALIC));
             } else {
                 for (var e : properties.entrySet()) {
                     String key = e.getKey();
@@ -263,7 +256,7 @@ public class StatsDisplay {
             return translations.translate(viewer, "stats.value.never");
         }
 
-        Translator translator = this.translations.getServerTranslations().getTranslator();
+        Translator translator = translations.getTranslator();
         String language = PlayerLanguage.getLanguage(viewer);
         SimpleDateFormat format = translator.getDateFormat(language);
 
