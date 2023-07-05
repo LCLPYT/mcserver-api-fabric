@@ -1,8 +1,8 @@
 package work.lclpnet.serverimpl.kibu;
 
+import work.lclpnet.kibu.translate.TranslationService;
 import work.lclpnet.serverapi.util.ServerContext;
-import work.lclpnet.serverimpl.kibu.net.NetworkHandler;
-import work.lclpnet.translate.TranslationService;
+import work.lclpnet.serverimpl.kibu.network.NetworkHandler;
 
 public interface MCServerKibu {
 

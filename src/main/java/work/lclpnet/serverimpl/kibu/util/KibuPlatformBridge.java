@@ -5,10 +5,10 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.slf4j.Logger;
+import work.lclpnet.kibu.translate.TranslationService;
 import work.lclpnet.serverapi.msg.MCMessage;
 import work.lclpnet.serverapi.util.IPlatformBridge;
 import work.lclpnet.serverapi.util.MojangAPI;
-import work.lclpnet.translate.TranslationService;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;

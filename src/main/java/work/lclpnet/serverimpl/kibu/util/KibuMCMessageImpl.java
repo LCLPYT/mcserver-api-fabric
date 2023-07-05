@@ -6,8 +6,8 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.math.MathHelper;
+import work.lclpnet.kibu.translate.TranslationService;
 import work.lclpnet.serverapi.msg.MCMessage;
-import work.lclpnet.translate.TranslationService;
 
 import java.util.List;
 

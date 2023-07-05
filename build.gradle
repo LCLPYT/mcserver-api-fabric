@@ -1,4 +1,3 @@
-import net.fabricmc.loom.task.RemapJarTask
 import work.lclpnet.build.task.GithubDeploymentTask
 
 plugins {
@@ -6,7 +5,7 @@ plugins {
     id 'fabric-loom' version '1.2.7'
     id 'maven-publish'
     id 'gradle-build-utils' version '1.5.3'
-    id 'kibu-plugin-dev' version '0.6.1'
+    id 'kibu-plugin-dev' version '0.8.0'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
@@ -27,15 +26,6 @@ repositories {
     }
 }
 
-sourceSets {
-    translate
-
-    main {
-        // make translate classes available in the main sourceSet
-        compileClasspath += translate.output
-    }
-}
-
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
@@ -49,51 +39,27 @@ dependencies {
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
 
     // bundle these dependencies
-    'work.lclpnet:json-config4j:1.0.0'.with {
-        implementation it
-        bundle (it) { transitive = false }
+    def implBundle = { String dep ->
+        implementation dep
+        bundle dep
     }
 
-    "work.lclpnet:translations4j:${project.translations4j_version}".with {
-        implementation it
-        bundle (it) { transitive = false }
-    }
+    implBundle 'work.lclpnet:json-config4j:1.0.0'
+    implBundle "work.lclpnet:lclpnetwork-api:${project.lclpnetwork_api_version}"
+    implBundle "work.lclpnet:lclpstorage:${project.lclpstorage_version}"
+    implBundle "work.lclpnet:translations4j:${project.translations4j_version}:network"
 
-    "work.lclpnet:lclpnetwork-api:${project.lclpnetwork_api_version}".with {
+    "work.lclpnet.mcserver-api:mcserver-api-base:${project.mcserver_api_base_version}".with {
         implementation it
-        bundle (it) { transitive = false }
+        provide it
     }
-
-    "work.lclpnet:lclpstorage:${project.lclpstorage_version}".with {
-        implementation it
-        bundle (it) { transitive = false }
-    }
-
-    implementation "work.lclpnet.mcserver-api:mcserver-api-base:${project.mcserver_api_base_version}"
 
     // test dependencies
     testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
 }
 
-// add main dependencies to the translate sourceSet
-configurations {
-    translateImplementation.extendsFrom(implementation)
-
-    translateCompileClasspath.extendsFrom(modCompileClasspathMapped)
-    translateRuntimeClasspath.extendsFrom(modCompileClasspathMapped)
-}
-
-// add minecraft dependencies to activity sourceSet (only available after project evaluation)
-afterEvaluate {
-    configurations {
-        translateCompileClasspath.extendsFrom(minecraftNamedCompile)
-        translateRuntimeClasspath.extendsFrom(minecraftNamedRuntime)
-    }
-}
-
 kibu {
-    // add translate sources to the dev plugin loader
-    pluginPaths.from(sourceSets.translate.output)
+    appBundleName = "mcsapi"
 }
 
 loom {
@@ -130,29 +96,7 @@ shadowJar {
     mergeServiceFiles()
 }
 
-// add translation jar tasks
-tasks.register("translationJar", Jar.class) {
-    description 'Builds the standalone translation api jar.'
-    group 'build'
-    archiveClassifier.set("translate-dev")
-    destinationDirectory.set(new File(buildDir, "devlibs"))
-}
-
-tasks.register('remapTranslationJar', RemapJarTask.class) {
-    dependsOn tasks.translationJar
-
-    description 'Remaps the built translation api jar to intermediary mappings.'
-    group 'fabric'
-    archiveClassifier.set('translate')
-
-    inputFile.convention(tasks.translationJar.archiveFile)
-}
-
-[translationJar, remapTranslationJar].each {
-    tasks.assemble.dependsOn(it)
-}
-
-[jar, sourcesJar, shadowJar, translationJar, remapTranslationJar].each {
+[jar, sourcesJar, shadowJar].each {
     it.from("LICENSE.md") {
         rename { "${it}_${project.archivesBaseName}"}
     }
@@ -185,7 +129,6 @@ publishing {
 
             artifact remapJar
             artifact remapSourcesJar
-            artifact remapTranslationJar
 
             pom {
                 name = 'MCServer Kibu Implementation'

@@ -15,8 +15,8 @@ import work.lclpnet.kibu.access.PlayerLanguage;
 import work.lclpnet.kibu.inv.item.ItemStackUtil;
 import work.lclpnet.kibu.inv.type.KibuInventory;
 import work.lclpnet.kibu.inv.type.RestrictedInventory;
+import work.lclpnet.kibu.translate.TranslationService;
 import work.lclpnet.lclpnetwork.facade.MCStats;
-import work.lclpnet.translate.TranslationService;
 import work.lclpnet.translations.Translator;
 
 import java.text.SimpleDateFormat;

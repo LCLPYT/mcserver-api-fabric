@@ -1,4 +1,4 @@
-package work.lclpnet.serverimpl.kibu.net;
+package work.lclpnet.serverimpl.kibu.network;
 
 import org.slf4j.Logger;
 import work.lclpnet.lclpnetwork.api.APIAccess;
@@ -38,7 +38,11 @@ public class NetworkHandler {
         try {
             token = loadToken(config);
         } catch (Throwable e) {
-            logger.error("Failed to load access token... Will fallback to no-op", e);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Failed to load access token... Will fallback to no-op", e);
+            } else {
+                logger.warn("Failed to load access token... Will fallback to no-op");
+            }
             return;
         }
 

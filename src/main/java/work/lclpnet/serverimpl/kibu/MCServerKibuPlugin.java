@@ -5,6 +5,7 @@ import net.minecraft.server.MinecraftServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.kibu.plugin.KibuPlugin;
+import work.lclpnet.kibu.translate.TranslationService;
 import work.lclpnet.mplugins.ext.WorldStateListener;
 import work.lclpnet.serverapi.MCServerAPI;
 import work.lclpnet.serverapi.msg.ServerTranslations;
@@ -15,13 +16,12 @@ import work.lclpnet.serverimpl.kibu.cmd.MCLinkCommand;
 import work.lclpnet.serverimpl.kibu.cmd.StatsCommand;
 import work.lclpnet.serverimpl.kibu.config.ConfigManager;
 import work.lclpnet.serverimpl.kibu.event.MCServerListener;
-import work.lclpnet.serverimpl.kibu.net.NetworkHandler;
+import work.lclpnet.serverimpl.kibu.network.NetworkHandler;
 import work.lclpnet.serverimpl.kibu.service.ServerLanguagePreferenceProvider;
 import work.lclpnet.serverimpl.kibu.util.KibuPlatformBridge;
 import work.lclpnet.serverimpl.kibu.util.KibuSPITranslationLoader;
 import work.lclpnet.serverimpl.kibu.util.StatsDisplay;
 import work.lclpnet.serverimpl.kibu.util.StatsManager;
-import work.lclpnet.translate.TranslationService;
 
 import java.nio.file.Path;
 

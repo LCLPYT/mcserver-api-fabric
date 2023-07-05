@@ -13,7 +13,7 @@ import work.lclpnet.lclpnetwork.facade.MCStats;
 import work.lclpnet.serverapi.util.ServerCache;
 import work.lclpnet.serverimpl.kibu.MCServerKibu;
 import work.lclpnet.serverimpl.kibu.config.ConfigAccess;
-import work.lclpnet.serverimpl.kibu.net.NetworkHandler;
+import work.lclpnet.serverimpl.kibu.network.NetworkHandler;
 import work.lclpnet.serverimpl.kibu.util.StatsDisplay;
 import work.lclpnet.serverimpl.kibu.util.StatsManager;
 

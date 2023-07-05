@@ -21,7 +21,7 @@ public class MCSConfig implements JsonConfig {
         if (json.has("network")) {
             JSONObject network = json.getJSONObject("network");
 
-            if (network.has("app_name")) {
+            if (network.has("app_name") && !network.isNull("app_name")) {
                 appName = network.getString("app_name");
             }
 

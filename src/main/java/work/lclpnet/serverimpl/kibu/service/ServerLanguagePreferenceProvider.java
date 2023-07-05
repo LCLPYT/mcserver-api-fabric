@@ -1,8 +1,8 @@
 package work.lclpnet.serverimpl.kibu.service;
 
 import net.minecraft.server.network.ServerPlayerEntity;
+import work.lclpnet.kibu.translate.pref.LanguagePreferenceProvider;
 import work.lclpnet.serverapi.msg.ServerTranslations;
-import work.lclpnet.translate.pref.LanguagePreferenceProvider;
 
 import java.util.Optional;
 
