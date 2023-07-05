@@ -105,7 +105,7 @@ shadowJar {
 def env = System.getenv()
 
 tasks.register("github", GithubDeploymentTask) {
-    dependsOn tasks.shadowJar
+    dependsOn tasks.remapShadowJar
 
     config {
         token = env.get("GITHUB_TOKEN")
@@ -117,7 +117,7 @@ tasks.register("github", GithubDeploymentTask) {
         tag = buildUtils.latestTag()
     }
 
-    assets.add(tasks.shadowJar.archiveFile.get())
+    assets.add(tasks.remapShadowJar.archiveFile.get())
 }
 
 publishing {
