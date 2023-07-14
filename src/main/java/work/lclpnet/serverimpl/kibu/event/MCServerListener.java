@@ -9,7 +9,9 @@ import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
 import work.lclpnet.kibu.hook.player.PlayerInventoryHooks;
 import work.lclpnet.kibu.plugin.hook.HookListenerModule;
 import work.lclpnet.kibu.plugin.hook.HookRegistrar;
+import work.lclpnet.lclpnetwork.ext.LCLPMinecraftAPI;
 import work.lclpnet.lclpnetwork.facade.MCStats;
+import work.lclpnet.serverapi.MCServerAPI;
 import work.lclpnet.serverapi.util.ServerCache;
 import work.lclpnet.serverimpl.kibu.MCServerKibu;
 import work.lclpnet.serverimpl.kibu.config.ConfigAccess;
@@ -19,6 +21,7 @@ import work.lclpnet.serverimpl.kibu.util.StatsManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class MCServerListener implements HookListenerModule {
@@ -50,11 +53,11 @@ public class MCServerListener implements HookListenerModule {
     }
 
     private void onJoin(ServerPlayerEntity player) {
-        updateLastSeen(player);
+        updateLastSeen(player, true);
     }
 
     private void onQuit(ServerPlayerEntity player) {
-        updateLastSeen(player).thenRun(() -> serverCache.dropAllCachesFor(player.getUuid().toString()));
+        updateLastSeen(player, false).thenRun(() -> serverCache.dropAllCachesFor(player.getUuid().toString()));
     }
 
     private void onModifyInventory(PlayerInventoryHooks.ClickEvent event) {
@@ -128,10 +131,22 @@ public class MCServerListener implements HookListenerModule {
         }
     }
 
-    private CompletableFuture<Void> updateLastSeen(ServerPlayerEntity player) {
+    private CompletableFuture<Void> updateLastSeen(ServerPlayerEntity player, boolean forceLoadPlayer) {
         NetworkHandler networkHandler = MCServerKibu.getInstance().getNetworkHandler();
 
-        return networkHandler.getApi().map(api -> api.updateLastSeen(player.getUuid().toString()).exceptionally(ex -> {
+        String uuid = player.getUuid().toString();
+
+        Optional<MCServerAPI> optApi = networkHandler.getApi();
+
+        if (optApi.isEmpty()) {
+            if (forceLoadPlayer) {
+                return serverCache.refreshPlayer(LCLPMinecraftAPI.INSTANCE, uuid);
+            }
+
+            return CompletableFuture.completedFuture(null);
+        }
+
+        return optApi.get().updateLastSeen(uuid).exceptionally(ex -> {
             if (configAccess.getConfig().debug) {
                 ex.printStackTrace();
             }
@@ -141,6 +156,6 @@ public class MCServerListener implements HookListenerModule {
             if (res == null) {
                 logger.warn("Could not update last seen for player '{}'.", player.getEntityName());
             }
-        })).orElse(null);
+        });
     }
 }
