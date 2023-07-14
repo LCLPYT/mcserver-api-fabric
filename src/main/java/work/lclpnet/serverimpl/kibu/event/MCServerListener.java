@@ -57,7 +57,9 @@ public class MCServerListener implements HookListenerModule {
     }
 
     private void onQuit(ServerPlayerEntity player) {
-        updateLastSeen(player, false).thenRun(() -> serverCache.dropAllCachesFor(player.getUuid().toString()));
+        updateLastSeen(player, false)
+                .exceptionally(ignored -> null)
+                .thenRun(() -> serverCache.dropAllCachesFor(player.getUuid().toString()));
     }
 
     private void onModifyInventory(PlayerInventoryHooks.ClickEvent event) {
@@ -146,7 +148,7 @@ public class MCServerListener implements HookListenerModule {
             return CompletableFuture.completedFuture(null);
         }
 
-        return optApi.get().updateLastSeen(uuid).exceptionally(ex -> {
+        return optApi.get().updateLastSeen(uuid, serverCache).exceptionally(ex -> {
             if (configAccess.getConfig().debug) {
                 ex.printStackTrace();
             }
