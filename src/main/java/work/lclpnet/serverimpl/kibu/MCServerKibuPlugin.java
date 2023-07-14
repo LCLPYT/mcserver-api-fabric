@@ -2,13 +2,16 @@ package work.lclpnet.serverimpl.kibu;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import work.lclpnet.kibu.plugin.KibuPlugin;
+import work.lclpnet.kibu.plugin.ext.KibuPlugin;
+import work.lclpnet.kibu.plugin.ext.TranslatedPlugin;
 import work.lclpnet.kibu.translate.TranslationService;
+import work.lclpnet.kibu.translate.pref.LanguagePreferenceProvider;
+import work.lclpnet.lclpnetwork.facade.MCPlayer;
 import work.lclpnet.mplugins.ext.WorldStateListener;
 import work.lclpnet.serverapi.MCServerAPI;
-import work.lclpnet.serverapi.msg.ServerTranslations;
 import work.lclpnet.serverapi.util.ServerCache;
 import work.lclpnet.serverapi.util.ServerContext;
 import work.lclpnet.serverimpl.kibu.cmd.LanguageCommand;
@@ -17,15 +20,17 @@ import work.lclpnet.serverimpl.kibu.cmd.StatsCommand;
 import work.lclpnet.serverimpl.kibu.config.ConfigManager;
 import work.lclpnet.serverimpl.kibu.event.MCServerListener;
 import work.lclpnet.serverimpl.kibu.network.NetworkHandler;
-import work.lclpnet.serverimpl.kibu.service.ServerLanguagePreferenceProvider;
 import work.lclpnet.serverimpl.kibu.util.KibuPlatformBridge;
-import work.lclpnet.serverimpl.kibu.util.KibuSPITranslationLoader;
 import work.lclpnet.serverimpl.kibu.util.StatsDisplay;
 import work.lclpnet.serverimpl.kibu.util.StatsManager;
+import work.lclpnet.translations.loader.translation.SPITranslationLoader;
+import work.lclpnet.translations.loader.translation.TranslationLoader;
 
 import java.nio.file.Path;
+import java.util.Optional;
 
-public class MCServerKibuPlugin extends KibuPlugin implements MCServerKibu, ServerContext, WorldStateListener {
+public class MCServerKibuPlugin extends KibuPlugin implements MCServerKibu, ServerContext, WorldStateListener,
+        TranslatedPlugin, LanguagePreferenceProvider {
 
     public static final String ID = "mcserver-api";
     private static final Logger logger = LoggerFactory.getLogger(ID);
@@ -52,8 +57,6 @@ public class MCServerKibuPlugin extends KibuPlugin implements MCServerKibu, Serv
         serverCache = new ServerCache();
         networkHandler.getApi().ifPresent(serverCache::init);
 
-        translationService = loadTranslations(serverCache);
-
         statsDisplay = new StatsDisplay(translationService, statsManager, logger);
 
         registerHooks(new MCServerListener(serverCache, configManager, statsManager, statsDisplay, logger));
@@ -73,26 +76,7 @@ public class MCServerKibuPlugin extends KibuPlugin implements MCServerKibu, Serv
     }
 
     @Override
-    public void onWorldUnready() {
-
-    }
-
-    private TranslationService loadTranslations(ServerCache cache) {
-        final KibuSPITranslationLoader loader = new KibuSPITranslationLoader();
-        final ServerTranslations serverTranslations;
-
-        try {
-            serverTranslations = new ServerTranslations(cache, loader);
-            serverTranslations.reloadTranslations().join();
-        } catch (RuntimeException e) {
-            throw new IllegalStateException("Could not initialize server translations", e);
-        }
-
-        final ServerLanguagePreferenceProvider provider = new ServerLanguagePreferenceProvider(serverTranslations);
-
-        return new TranslationService(serverTranslations.getTranslator(), provider);
-    }
-
+    public void onWorldUnready() {}
 
     @Override
     public NetworkHandler getNetworkHandler() {
@@ -118,5 +102,28 @@ public class MCServerKibuPlugin extends KibuPlugin implements MCServerKibu, Serv
         if (instance == null) throw new IllegalStateException("MCServerKibu is not yet loaded");
 
         return instance;
+    }
+
+    @Override
+    public void injectTranslationService(TranslationService translationService) {
+        this.translationService = translationService;
+    }
+
+    @Override
+    public TranslationLoader createTranslationLoader() {
+        ClassLoader classLoader = getClass().getClassLoader();
+        return new SPITranslationLoader(classLoader);
+    }
+
+    @Override
+    public Optional<String> getLanguagePreference(ServerPlayerEntity player) {
+        if (serverCache == null) return Optional.empty();
+
+        String uuid = player.getUuid().toString();
+        MCPlayer mcPlayer = serverCache.getPlayer(uuid);
+
+        if (mcPlayer == null) return Optional.empty();
+
+        return Optional.ofNullable(mcPlayer.getLanguage());
     }
 }

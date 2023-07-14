@@ -127,7 +127,7 @@ publishing {
         mavenJava(MavenPublication) {
             artifactId = project.archives_base_name
 
-            artifact remapJar
+            artifact remapShadowJar
             artifact remapSourcesJar
 
             pom {
