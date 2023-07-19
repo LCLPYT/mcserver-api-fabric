@@ -7,7 +7,7 @@ import work.lclpnet.config.json.JsonConfigFactory;
 public class MCSConfig implements JsonConfig {
 
     public boolean debug = false;
-    public String appName = null;
+    public String appName = "mcserver";
     public String environment = "live";
     public String host = "https://lclpnet.work";
 
@@ -21,7 +21,7 @@ public class MCSConfig implements JsonConfig {
         if (json.has("network")) {
             JSONObject network = json.getJSONObject("network");
 
-            if (network.has("app_name") && !network.isNull("app_name")) {
+            if (network.has("app_name")) {
                 appName = network.getString("app_name");
             }
 
