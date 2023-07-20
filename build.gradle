@@ -50,7 +50,7 @@ dependencies {
     implBundle "work.lclpnet:translations4j:${project.translations4j_version}:network"
 
     "work.lclpnet.mcserver-api:mcserver-api-base:${project.mcserver_api_base_version}".with {
-        implementation it
+        compileOnly it
         provide it
     }
 
