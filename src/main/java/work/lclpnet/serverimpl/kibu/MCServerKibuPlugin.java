@@ -21,6 +21,7 @@ import work.lclpnet.serverimpl.kibu.config.ConfigManager;
 import work.lclpnet.serverimpl.kibu.event.MCServerListener;
 import work.lclpnet.serverimpl.kibu.network.NetworkHandler;
 import work.lclpnet.serverimpl.kibu.util.KibuPlatformBridge;
+import work.lclpnet.serverimpl.kibu.util.KibuServerCache;
 import work.lclpnet.serverimpl.kibu.util.StatsDisplay;
 import work.lclpnet.serverimpl.kibu.util.StatsManager;
 import work.lclpnet.translations.loader.translation.SPITranslationLoader;
@@ -54,17 +55,18 @@ public class MCServerKibuPlugin extends KibuPlugin implements MCServerKibu, Serv
         networkHandler = new NetworkHandler(configManager, logger);
         networkHandler.init();
 
-        serverCache = new ServerCache();
-        networkHandler.getApi().ifPresent(serverCache::init);
-
         statsDisplay = new StatsDisplay(translationService, statsManager, logger);
-
-        registerHooks(new MCServerListener(serverCache, configManager, statsManager, statsDisplay, logger));
     }
 
     @Override
     public void onWorldReady() {
         final MinecraftServer server = getEnvironment().getServer();
+
+        serverCache = new KibuServerCache(server);
+        networkHandler.getApi().ifPresent(serverCache::init);
+
+        registerHooks(new MCServerListener(serverCache, configManager, statsManager, statsDisplay, logger));
+
         final KibuPlatformBridge platformBridge = new KibuPlatformBridge(server.getPlayerManager(), translationService, logger);
         final MCServerAPI api = networkHandler.getApi().orElse(null);
 

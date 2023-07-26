@@ -51,6 +51,7 @@ dependencies {
 
     "work.lclpnet.mcserver-api:mcserver-api-base:${project.mcserver_api_base_version}".with {
         compileOnly it
+        runtimeOnly it
         provide it
     }
 
