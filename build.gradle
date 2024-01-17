@@ -38,16 +38,10 @@ dependencies {
     implementation 'org.json:json:20231013'
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
 
-    // bundle these dependencies
-    def implBundle = { String dep ->
-        implementation dep
-        bundle dep
-    }
-
-    implBundle 'work.lclpnet:json-config4j:1.0.0'
-    implBundle "work.lclpnet:lclpnetwork-api:${project.lclpnetwork_api_version}"
-    implBundle "work.lclpnet:lclpstorage:${project.lclpstorage_version}"
-    implBundle "work.lclpnet:translations4j:${project.translations4j_version}:network"
+    bundle(implementation('work.lclpnet:json-config4j:1.0.0'))
+    bundle(implementation("work.lclpnet:lclpnetwork-api:${project.lclpnetwork_api_version}"))
+    bundle(implementation("work.lclpnet:lclpstorage:${project.lclpstorage_version}"))
+    bundle(compileOnly("work.lclpnet:translations4j:${project.translations4j_version}:network"))
 
     "work.lclpnet.mcserver-api:mcserver-api-base:${project.mcserver_api_base_version}".with {
         compileOnly it
