@@ -150,13 +150,13 @@ public class MCServerListener implements HookListenerModule {
 
         return optApi.get().updateLastSeen(uuid, serverCache).exceptionally(ex -> {
             if (configAccess.getConfig().debug) {
-                ex.printStackTrace();
+                logger.error("Failed to update last seen", ex);
             }
 
             return null;
         }).thenAccept(res -> {
             if (res == null) {
-                logger.warn("Could not update last seen for player '{}'.", player.getEntityName());
+                logger.warn("Could not update last seen for player '{}'.", player.getNameForScoreboard());
             }
         });
     }

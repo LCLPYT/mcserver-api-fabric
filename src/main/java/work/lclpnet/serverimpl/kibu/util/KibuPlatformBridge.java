@@ -49,7 +49,7 @@ public class KibuPlatformBridge implements IPlatformBridge {
         ServerPlayerEntity online = playerManager.getPlayer(uuid);
 
         if (online != null) {
-            return CompletableFuture.completedFuture(online.getEntityName());
+            return CompletableFuture.completedFuture(online.getNameForScoreboard());
         }
 
         return MojangAPI.getUsernameByUUID(uuid);
