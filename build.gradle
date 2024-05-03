@@ -41,13 +41,9 @@ dependencies {
     bundle(implementation('work.lclpnet:json-config4j:1.0.0'))
     bundle(implementation("work.lclpnet:lclpnetwork-api:${project.lclpnetwork_api_version}"))
     bundle(implementation("work.lclpnet:lclpstorage:${project.lclpstorage_version}"))
-    bundle(compileOnly("work.lclpnet:translations4j:${project.translations4j_version}:network"))
+    bundle(localRuntime(compileOnly("work.lclpnet:translations4j:${project.translations4j_version}:network")))
 
-    "work.lclpnet.mcserver-api:mcserver-api-base:${project.mcserver_api_base_version}".with {
-        compileOnly it
-        localRuntime it
-        provide it
-    }
+    provide(localRuntime(compileOnly("work.lclpnet.mcserver-api:mcserver-api-base:${project.mcserver_api_base_version}")))
 
     // test dependencies
     testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
@@ -73,12 +69,12 @@ test {
 java {
     withSourcesJar()
 
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.release.set(17)
+    it.options.release.set(21)
 }
 
 processResources {

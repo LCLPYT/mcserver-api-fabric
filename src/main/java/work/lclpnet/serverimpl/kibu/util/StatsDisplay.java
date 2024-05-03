@@ -1,18 +1,23 @@
 package work.lclpnet.serverimpl.kibu.util;
 
+import com.google.common.collect.Lists;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.text.Texts;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
+import net.minecraft.util.Unit;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import work.lclpnet.kibu.access.PlayerLanguage;
-import work.lclpnet.kibu.inv.item.ItemStackUtil;
 import work.lclpnet.kibu.inv.type.KibuInventory;
 import work.lclpnet.kibu.inv.type.RestrictedInventory;
 import work.lclpnet.kibu.translate.TranslationService;
@@ -52,7 +57,7 @@ public class StatsDisplay {
         statsInv.setParent(parent);
 
         ItemStack border = new ItemStack(Items.BLACK_STAINED_GLASS_PANE);
-        border.setCustomName(Text.empty());
+        border.set(DataComponentTypes.CUSTOM_NAME, Text.empty());
 
         for (int i = 0; i < 9; i++) {
             inv.setStack(i, border);
@@ -116,7 +121,7 @@ public class StatsDisplay {
     private ItemStack getBackItem(ServerPlayerEntity viewer) {
         ItemStack stack = new ItemStack(Items.ARROW);
 
-        stack.setCustomName(translations.translateText(viewer, "stats.back").formatted(Formatting.BLUE));
+        stack.set(DataComponentTypes.CUSTOM_NAME, translations.translateText(viewer, "stats.back").formatted(Formatting.BLUE));
 
         return stack;
     }
@@ -132,7 +137,7 @@ public class StatsDisplay {
 
         String content = translations.translate(viewer, "stats.page.current", page, pagesRequired);
 
-        stack.setCustomName(Text.literal(content).formatted(Formatting.AQUA));
+        stack.set(DataComponentTypes.CUSTOM_NAME, Text.literal(content).formatted(Formatting.AQUA));
 
         return stack;
     }
@@ -140,7 +145,7 @@ public class StatsDisplay {
     private ItemStack getNextPageItem(ServerPlayerEntity viewer) {
         ItemStack stack = new ItemStack(Items.EMERALD_BLOCK);
 
-        stack.setCustomName(translations.translateText(viewer, "stats.page.next").formatted(Formatting.GREEN));
+        stack.set(DataComponentTypes.CUSTOM_NAME, translations.translateText(viewer, "stats.page.next").formatted(Formatting.GREEN));
 
         return stack;
     }
@@ -148,7 +153,7 @@ public class StatsDisplay {
     private ItemStack getPrevPageItem(ServerPlayerEntity viewer) {
         ItemStack stack = new ItemStack(Items.REDSTONE_BLOCK);
 
-        stack.setCustomName(translations.translateText(viewer, "stats.page.prev").formatted(Formatting.RED));
+        stack.set(DataComponentTypes.CUSTOM_NAME, translations.translateText(viewer, "stats.page.prev").formatted(Formatting.RED));
 
         return stack;
     }
@@ -161,16 +166,23 @@ public class StatsDisplay {
         Text name = Text.literal(entry.getTitle()).formatted(displayNameColor, Formatting.BOLD)
                 .styled(style -> style.withItalic(false));
 
-        stack.setCustomName(name);
+        stack.set(DataComponentTypes.CUSTOM_NAME, name);
 
-        stack.addHideFlag(ItemStack.TooltipSection.ENCHANTMENTS);
-        stack.addHideFlag(ItemStack.TooltipSection.ADDITIONAL);
-        stack.addHideFlag(ItemStack.TooltipSection.DYE);
-        stack.addHideFlag(ItemStack.TooltipSection.UPGRADES);
-        stack.addHideFlag(ItemStack.TooltipSection.MODIFIERS);
-        stack.addHideFlag(ItemStack.TooltipSection.UNBREAKABLE);
-        stack.addHideFlag(ItemStack.TooltipSection.CAN_DESTROY);
-        stack.addHideFlag(ItemStack.TooltipSection.CAN_PLACE);
+        stack.set(DataComponentTypes.ATTRIBUTE_MODIFIERS, stack.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT).withShowInTooltip(false));
+
+        DyedColorComponent dyedColorComponent = stack.get(DataComponentTypes.DYED_COLOR);
+
+        if (dyedColorComponent != null) {
+            stack.set(DataComponentTypes.DYED_COLOR, dyedColorComponent.withShowInTooltip(false));
+        }
+
+        stack.set(DataComponentTypes.HIDE_ADDITIONAL_TOOLTIP, Unit.INSTANCE);
+
+        UnbreakableComponent unbreakableComponent = stack.get(DataComponentTypes.UNBREAKABLE);
+
+        if (unbreakableComponent != null) {
+            stack.set(DataComponentTypes.UNBREAKABLE, unbreakableComponent.withShowInTooltip(false));
+        }
 
         List<Text> lore = new ArrayList<>();
         if (entry.getType() == MCStats.EntryType.GROUP) {
@@ -196,7 +208,7 @@ public class StatsDisplay {
             }
         }
 
-        ItemStackUtil.setLore(stack, lore);
+        stack.set(DataComponentTypes.LORE, new LoreComponent(Lists.transform(lore, t -> Texts.setStyleIfAbsent(t.copy(), Style.EMPTY.withItalic(false)))));
 
         if (!mainEntry && entry.getType() == MCStats.EntryType.GROUP) {
             statsInv.setItemStackGroup(stack, entry);
