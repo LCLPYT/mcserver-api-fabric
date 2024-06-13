@@ -242,7 +242,7 @@ public class StatsDisplay {
         final Identifier identifier;
 
         try {
-            identifier = new Identifier(minecraftId);
+            identifier = Identifier.of(minecraftId);
         } catch (InvalidIdentifierException e) {
             logger.error("Invalid identifier {}", minecraftId, e);
             return Items.BOOK;
