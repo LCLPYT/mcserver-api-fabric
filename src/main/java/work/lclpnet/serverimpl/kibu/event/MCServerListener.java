@@ -5,15 +5,15 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.slf4j.Logger;
+import work.lclpnet.kibu.hook.HookListenerModule;
+import work.lclpnet.kibu.hook.HookRegistrar;
 import work.lclpnet.kibu.hook.player.PlayerConnectionHooks;
 import work.lclpnet.kibu.hook.player.PlayerInventoryHooks;
-import work.lclpnet.kibu.plugin.hook.HookListenerModule;
-import work.lclpnet.kibu.plugin.hook.HookRegistrar;
 import work.lclpnet.lclpnetwork.ext.LCLPMinecraftAPI;
 import work.lclpnet.lclpnetwork.facade.MCStats;
 import work.lclpnet.serverapi.MCServerAPI;
 import work.lclpnet.serverapi.util.ServerCache;
-import work.lclpnet.serverimpl.kibu.MCServerKibu;
+import work.lclpnet.serverimpl.kibu.MCServerFabric;
 import work.lclpnet.serverimpl.kibu.config.ConfigAccess;
 import work.lclpnet.serverimpl.kibu.network.NetworkHandler;
 import work.lclpnet.serverimpl.kibu.util.StatsDisplay;
@@ -134,7 +134,7 @@ public class MCServerListener implements HookListenerModule {
     }
 
     private CompletableFuture<Void> updateLastSeen(ServerPlayerEntity player, boolean forceLoadPlayer) {
-        NetworkHandler networkHandler = MCServerKibu.getInstance().getNetworkHandler();
+        NetworkHandler networkHandler = MCServerFabric.getInstance().getNetworkHandler();
 
         String uuid = player.getUuid().toString();
 

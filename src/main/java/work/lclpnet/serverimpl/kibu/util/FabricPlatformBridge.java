@@ -13,16 +13,16 @@ import work.lclpnet.serverapi.util.MojangAPI;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class KibuPlatformBridge implements IPlatformBridge {
+public class FabricPlatformBridge implements IPlatformBridge {
 
     private final PlayerManager playerManager;
     private final Logger logger;
-    private final KibuMCMessageImpl messageSerializer;
+    private final FabricMCMessageImpl messageSerializer;
 
-    public KibuPlatformBridge(PlayerManager playerManager, TranslationService translations, Logger logger) {
+    public FabricPlatformBridge(PlayerManager playerManager, TranslationService translations, Logger logger) {
         this.playerManager = playerManager;
         this.logger = logger;
-        this.messageSerializer = new KibuMCMessageImpl(translations);
+        this.messageSerializer = new FabricMCMessageImpl(translations);
     }
 
     @Override

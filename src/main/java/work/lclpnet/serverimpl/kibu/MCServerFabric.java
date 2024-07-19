@@ -4,7 +4,7 @@ import work.lclpnet.kibu.translate.TranslationService;
 import work.lclpnet.serverapi.util.ServerContext;
 import work.lclpnet.serverimpl.kibu.network.NetworkHandler;
 
-public interface MCServerKibu {
+public interface MCServerFabric {
 
     NetworkHandler getNetworkHandler();
 
@@ -12,7 +12,7 @@ public interface MCServerKibu {
 
     TranslationService getTranslationService();
 
-    static MCServerKibu getInstance() {
-        return MCServerKibuPlugin.getInstance();
+    static MCServerFabric getInstance() {
+        return MCServerFabricMod.getInstance();
     }
 }
