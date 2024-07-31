@@ -86,7 +86,9 @@ processResources {
 }
 
 jar {
-    from configurations.provide
+    from configurations.provide.collect {
+        zipTree(it)
+    }
 }
 
 [jar, sourcesJar].each {
