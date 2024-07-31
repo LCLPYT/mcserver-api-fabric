@@ -9,8 +9,8 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.kibu.inv.type.KibuInventory;
-import work.lclpnet.kibu.plugin.cmd.CommandRegistrar;
 import work.lclpnet.lclpnetwork.facade.MCStats;
 import work.lclpnet.serverapi.MCServerAPI;
 import work.lclpnet.serverapi.cmd.StatsCommandScheme;
@@ -18,7 +18,7 @@ import work.lclpnet.serverapi.msg.MCMessage;
 import work.lclpnet.serverapi.util.ServerContext;
 import work.lclpnet.serverimpl.kibu.cmd.arg.PlayerNameSuggestionProvider;
 import work.lclpnet.serverimpl.kibu.config.ConfigAccess;
-import work.lclpnet.serverimpl.kibu.util.KibuPlatformBridge;
+import work.lclpnet.serverimpl.kibu.util.FabricPlatformBridge;
 import work.lclpnet.serverimpl.kibu.util.StatsDisplay;
 
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ public class StatsCommand extends PlatformCommand<Boolean> implements StatsComma
     private final MinecraftServer server;
     private final StatsDisplay statsDisplay;
 
-    public StatsCommand(MCServerAPI api, KibuPlatformBridge platformBridge, ServerContext context, ConfigAccess configAccess,
+    public StatsCommand(MCServerAPI api, FabricPlatformBridge platformBridge, ServerContext context, ConfigAccess configAccess,
                         MinecraftServer server, StatsDisplay statsDisplay) {
         super(api, platformBridge, context, configAccess);
         this.server = server;

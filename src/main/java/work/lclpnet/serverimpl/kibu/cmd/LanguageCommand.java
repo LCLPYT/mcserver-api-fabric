@@ -7,18 +7,18 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import work.lclpnet.kibu.plugin.cmd.CommandRegistrar;
+import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.serverapi.MCServerAPI;
 import work.lclpnet.serverapi.cmd.LanguageCommandScheme;
 import work.lclpnet.serverapi.util.ServerCache;
 import work.lclpnet.serverapi.util.ServerContext;
 import work.lclpnet.serverimpl.kibu.cmd.arg.LanguageSuggestionProvider;
 import work.lclpnet.serverimpl.kibu.config.ConfigAccess;
-import work.lclpnet.serverimpl.kibu.util.KibuPlatformBridge;
+import work.lclpnet.serverimpl.kibu.util.FabricPlatformBridge;
 
 public class LanguageCommand extends PlatformCommand<Boolean> implements LanguageCommandScheme {
 
-    public LanguageCommand(MCServerAPI api, KibuPlatformBridge platformBridge, ServerContext context, ConfigAccess configAccess) {
+    public LanguageCommand(MCServerAPI api, FabricPlatformBridge platformBridge, ServerContext context, ConfigAccess configAccess) {
         super(api, platformBridge, context, configAccess);
     }
 
@@ -26,7 +26,7 @@ public class LanguageCommand extends PlatformCommand<Boolean> implements Languag
         registrar.registerCommand(command(getName()));
 
         // aliases
-        registrar.registerCommand(command("lang"));
+        registrar.registerCommand(command("assets/mcserver-api/lang"));
     }
 
     private LiteralArgumentBuilder<ServerCommandSource> command(String name) {

@@ -10,11 +10,11 @@ import work.lclpnet.serverapi.util.ServerCache;
 
 import java.util.UUID;
 
-public class KibuServerCache extends ServerCache {
+public class FabricServerCache extends ServerCache {
 
     private final MinecraftServer server;
 
-    public KibuServerCache(MinecraftServer server) {
+    public FabricServerCache(MinecraftServer server) {
         this.server = server;
     }
 
@@ -33,6 +33,6 @@ public class KibuServerCache extends ServerCache {
         String playerLanguage = player.getLanguage();
         String language = playerLanguage != null ? playerLanguage : PlayerLanguage.getLanguage(serverPlayer);
 
-        server.submit(() -> LanguageChangedCallback.HOOK.invoker().onChanged(serverPlayer, language, LanguageChangedCallback.Reason.OTHER));
+        server.execute(() -> LanguageChangedCallback.HOOK.invoker().onChanged(serverPlayer, language, LanguageChangedCallback.Reason.OTHER));
     }
 }

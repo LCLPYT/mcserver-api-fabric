@@ -9,9 +9,9 @@ package work.lclpnet.serverimpl.kibu.util;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.Nullable;
 import work.lclpnet.lclpnetwork.facade.MCStats;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

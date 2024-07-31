@@ -2,11 +2,9 @@ import work.lclpnet.build.task.GithubDeploymentTask
 
 plugins {
     id 'java'
-    id 'fabric-loom' version '1.6-SNAPSHOT'
+    id 'fabric-loom' version '1.7-SNAPSHOT'
     id 'maven-publish'
     id 'gradle-build-utils' version '1.7.0'
-    id 'kibu-plugin-dev' version '0.14.0'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 Properties props = buildUtils.loadProperties('publish.properties')
@@ -26,6 +24,12 @@ repositories {
     }
 }
 
+configurations {
+    provide {
+        transitive = false
+    }
+}
+
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
@@ -33,24 +37,19 @@ dependencies {
 
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modImplementation "work.lclpnet.mods.kibu:kibu:${project.kibu_version}"
-    modImplementation "work.lclpnet.mods.kibu:kibu-plugins:${project.kibu_plugins_version}"
 
     implementation 'org.json:json:20231013'
-    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+    compileOnly 'org.jetbrains:annotations:24.1.0'
 
-    bundle(implementation('work.lclpnet:json-config4j:1.0.0'))
-    bundle(implementation("work.lclpnet:lclpnetwork-api:${project.lclpnetwork_api_version}"))
-    bundle(implementation("work.lclpnet:lclpstorage:${project.lclpstorage_version}"))
-    bundle(localRuntime(compileOnly("work.lclpnet:translations4j:${project.translations4j_version}:network")))
+    include(implementation('work.lclpnet:json-config4j:1.0.0'))
+    include(implementation("work.lclpnet:lclpnetwork-api:${project.lclpnetwork_api_version}"))
+    include(implementation("work.lclpnet:lclpstorage:${project.lclpstorage_version}"))
+    include(localRuntime(compileOnly("work.lclpnet:translations4j:${project.translations4j_version}:network")))
 
     provide(localRuntime(compileOnly("work.lclpnet.mcserver-api:mcserver-api-base:${project.mcserver_api_base_version}")))
 
     // test dependencies
     testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
-}
-
-kibu {
-    appBundleName = "mcsapi"
 }
 
 loom {
@@ -81,16 +80,18 @@ processResources {
     // replace placeholders in resources
     inputs.property "version", project.version
 
-    filesMatching("plugin.json") {
+    filesMatching("fabric.mod.json") {
         expand "version": project.version
     }
 }
 
-shadowJar {
-    mergeServiceFiles()
+jar {
+    from configurations.provide.collect {
+        zipTree(it)
+    }
 }
 
-[jar, sourcesJar, shadowJar].each {
+[jar, sourcesJar].each {
     it.from("LICENSE.md") {
         rename { "${it}_${project.archivesBaseName}"}
     }
@@ -99,7 +100,7 @@ shadowJar {
 def env = System.getenv()
 
 tasks.register("github", GithubDeploymentTask) {
-    dependsOn tasks.remapShadowJar
+    dependsOn tasks.remapJar
 
     config {
         token = env.get("GITHUB_TOKEN")
@@ -111,7 +112,7 @@ tasks.register("github", GithubDeploymentTask) {
         tag = buildUtils.latestTag()
     }
 
-    assets.add(tasks.remapShadowJar.archiveFile.get())
+    assets.add(tasks.remapJar.archiveFile.get())
 }
 
 publishing {
@@ -121,11 +122,11 @@ publishing {
         mavenJava(MavenPublication) {
             artifactId = project.archives_base_name
 
-            from components.kibu
+            from components.java
 
             pom {
-                name = 'MCServer Kibu Implementation'
-                description = 'A Java library to manage Minecraft server backend interaction with LCLPNetwork. For Fabric/Kibu.'
+                name = 'MCServer Fabric Implementation'
+                description = 'A Java library to manage Minecraft server backend interaction with LCLPNetwork. For Fabric.'
             }
         }
     }

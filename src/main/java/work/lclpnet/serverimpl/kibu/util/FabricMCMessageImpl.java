@@ -11,11 +11,11 @@ import work.lclpnet.serverapi.msg.MCMessage;
 
 import java.util.List;
 
-public class KibuMCMessageImpl {
+public class FabricMCMessageImpl {
 
     private final TranslationService translations;
 
-    protected KibuMCMessageImpl(TranslationService translations) {
+    protected FabricMCMessageImpl(TranslationService translations) {
         this.translations = translations;
     }
 
