@@ -33,7 +33,7 @@ public class MCServerFabricMod implements DedicatedServerModInitializer, MCServe
     public static final String ID = "mcserver-api";
     private static final Logger logger = LoggerFactory.getLogger(ID);
     private static MCServerFabricMod instance = null;
-    private Translations Translations = null;
+    private Translations translations = null;
     private NetworkHandler networkHandler = null;
     private ServerCache serverCache = null;
     private ConfigManager configManager = null;
@@ -45,13 +45,13 @@ public class MCServerFabricMod implements DedicatedServerModInitializer, MCServe
         instance = this;
 
         var loadingTranslations = MCServerTranslations.load(logger);
-        Translations = loadingTranslations.translations();
+        translations = loadingTranslations.translations();
 
         final Path configFile = FabricLoader.getInstance().getConfigDir().resolve(ID).resolve("config.json");
 
         configManager = new ConfigManager(configFile, logger);
         networkHandler = new NetworkHandler(configManager, logger);
-        statsDisplay = new StatsDisplay(Translations, statsManager, logger);
+        statsDisplay = new StatsDisplay(translations, statsManager, logger);
 
         var whenWorldReady = new CompletableFuture<MinecraftServer>();
         ServerWorldReadyCallback.HOOK.register(whenWorldReady::complete);
@@ -79,7 +79,7 @@ public class MCServerFabricMod implements DedicatedServerModInitializer, MCServe
         HookContainer hooks = new HookContainer();
         hooks.registerHooks(new MCServerListener(serverCache, configManager, statsManager, statsDisplay, logger));
 
-        final FabricPlatformBridge platformBridge = new FabricPlatformBridge(server.getPlayerManager(), Translations, logger);
+        final FabricPlatformBridge platformBridge = new FabricPlatformBridge(server.getPlayerManager(), translations, logger);
         final MCServerAPI api = networkHandler.getApi().orElse(null);
 
         if (api == null) return;
@@ -103,7 +103,7 @@ public class MCServerFabricMod implements DedicatedServerModInitializer, MCServe
 
     @Override
     public Translations getTranslations() {
-        return Translations;
+        return translations;
     }
 
     @Override

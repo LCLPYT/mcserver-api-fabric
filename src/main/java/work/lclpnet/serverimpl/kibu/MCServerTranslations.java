@@ -27,10 +27,10 @@ class MCServerTranslations {
 
         DefaultLanguageTranslator translator = new DefaultLanguageTranslator(translationLoader);
 
-        Translations Translations = new Translations(translator);
+        Translations translations = new Translations(translator);
         var whenLoaded = translator.reload();
 
-        return new Result(Translations, whenLoaded);
+        return new Result(translations, whenLoaded);
     }
 
     public record Result(Translations translations, CompletableFuture<Void> whenLoaded) {}
