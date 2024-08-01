@@ -26,7 +26,7 @@ public class LanguageCommand extends PlatformCommand<Boolean> implements Languag
         registrar.registerCommand(command(getName()));
 
         // aliases
-        registrar.registerCommand(command("assets/mcserver-api/lang"));
+        registrar.registerCommand(command("lang"));
     }
 
     private LiteralArgumentBuilder<ServerCommandSource> command(String name) {

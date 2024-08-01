@@ -1,6 +1,6 @@
 package work.lclpnet.serverimpl.kibu;
 
-import work.lclpnet.kibu.translate.TranslationService;
+import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.serverapi.util.ServerContext;
 import work.lclpnet.serverimpl.kibu.network.NetworkHandler;
 
@@ -10,7 +10,7 @@ public interface MCServerFabric {
 
     ServerContext getServerContext();
 
-    TranslationService getTranslationService();
+    Translations getTranslations();
 
     static MCServerFabric getInstance() {
         return MCServerFabricMod.getInstance();

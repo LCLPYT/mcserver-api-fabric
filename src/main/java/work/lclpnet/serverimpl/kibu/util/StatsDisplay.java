@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import work.lclpnet.kibu.access.PlayerLanguage;
 import work.lclpnet.kibu.inv.type.KibuInventory;
 import work.lclpnet.kibu.inv.type.RestrictedInventory;
-import work.lclpnet.kibu.translate.TranslationService;
+import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.lclpnetwork.facade.MCStats;
 import work.lclpnet.translations.Translator;
 
@@ -29,11 +29,11 @@ import java.util.*;
 
 public class StatsDisplay {
 
-    private final TranslationService translations;
+    private final Translations translations;
     private final StatsManager statsManager;
     private final Logger logger;
 
-    public StatsDisplay(TranslationService translations, StatsManager statsManager, Logger logger) {
+    public StatsDisplay(Translations translations, StatsManager statsManager, Logger logger) {
         this.translations = translations;
         this.statsManager = statsManager;
         this.logger = logger;

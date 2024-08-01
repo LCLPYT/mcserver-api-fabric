@@ -5,7 +5,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.slf4j.Logger;
-import work.lclpnet.kibu.translate.TranslationService;
+import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.serverapi.msg.MCMessage;
 import work.lclpnet.serverapi.util.IPlatformBridge;
 import work.lclpnet.serverapi.util.MojangAPI;
@@ -19,7 +19,7 @@ public class FabricPlatformBridge implements IPlatformBridge {
     private final Logger logger;
     private final FabricMCMessageImpl messageSerializer;
 
-    public FabricPlatformBridge(PlayerManager playerManager, TranslationService translations, Logger logger) {
+    public FabricPlatformBridge(PlayerManager playerManager, Translations translations, Logger logger) {
         this.playerManager = playerManager;
         this.logger = logger;
         this.messageSerializer = new FabricMCMessageImpl(translations);

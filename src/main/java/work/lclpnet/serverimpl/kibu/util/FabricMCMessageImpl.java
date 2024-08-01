@@ -6,16 +6,16 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.math.MathHelper;
-import work.lclpnet.kibu.translate.TranslationService;
+import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.serverapi.msg.MCMessage;
 
 import java.util.List;
 
 public class FabricMCMessageImpl {
 
-    private final TranslationService translations;
+    private final Translations translations;
 
-    protected FabricMCMessageImpl(TranslationService translations) {
+    protected FabricMCMessageImpl(Translations translations) {
         this.translations = translations;
     }
 
