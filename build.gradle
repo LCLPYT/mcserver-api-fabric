@@ -2,7 +2,7 @@ import work.lclpnet.build.task.GithubDeploymentTask
 
 plugins {
     id 'java'
-    id 'fabric-loom' version '1.7-SNAPSHOT'
+    id 'fabric-loom' version '1.9-SNAPSHOT'
     id 'maven-publish'
     id 'gradle-build-utils' version '1.7.0'
 }
@@ -44,6 +44,7 @@ dependencies {
     include(implementation('work.lclpnet:json-config4j:1.0.0'))
     include(implementation("work.lclpnet:lclpnetwork-api:${project.lclpnetwork_api_version}"))
     include(implementation("work.lclpnet:lclpstorage:${project.lclpstorage_version}"))
+    implementation("work.lclpnet:translations4j:${project.translations4j_version}")
     include(localRuntime(compileOnly("work.lclpnet:translations4j:${project.translations4j_version}:network")))
 
     provide(localRuntime(compileOnly("work.lclpnet.mcserver-api:mcserver-api-base:${project.mcserver_api_base_version}")))
