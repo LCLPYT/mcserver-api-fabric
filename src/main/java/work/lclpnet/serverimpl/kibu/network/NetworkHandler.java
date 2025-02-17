@@ -82,7 +82,7 @@ public class NetworkHandler {
             throw new FileNotFoundException("'%s' does not exist!".formatted(tokenFile));
         }
 
-        return Files.readString(tokenFile, StandardCharsets.UTF_8);
+        return Files.readString(tokenFile, StandardCharsets.UTF_8).trim();
     }
 
     public Optional<MCServerAPI> getApi() {
