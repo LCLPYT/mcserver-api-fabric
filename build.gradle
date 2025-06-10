@@ -2,7 +2,7 @@ import work.lclpnet.build.task.GithubDeploymentTask
 
 plugins {
     id 'java'
-    id 'fabric-loom' version '1.9-SNAPSHOT'
+    id 'fabric-loom' version "${loom_version}"
     id 'maven-publish'
     id 'gradle-build-utils' version '1.7.0'
 }
@@ -10,7 +10,7 @@ plugins {
 Properties props = buildUtils.loadProperties('publish.properties')
 
 group = project.maven_group
-version = buildUtils.gitVersion()
+version = "${project.mod_version}+${project.minecraft_version}"
 
 base {
     archivesName = project.archives_base_name
@@ -110,7 +110,7 @@ tasks.register("github", GithubDeploymentTask) {
 
     release {
         title = "[$project.minecraft_version] $project.name $project.version"
-        tag = buildUtils.latestTag()
+        tag = project.version
     }
 
     assets.add(tasks.remapJar.archiveFile.get())

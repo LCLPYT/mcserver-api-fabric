@@ -1,8 +1,10 @@
 package work.lclpnet.serverimpl.kibu.util;
 
 import com.google.common.collect.Lists;
+import it.unimi.dsi.fastutil.objects.ReferenceSortedSets;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.*;
+import net.minecraft.component.type.LoreComponent;
+import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -14,7 +16,6 @@ import net.minecraft.text.Texts;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
-import net.minecraft.util.Unit;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import work.lclpnet.kibu.access.PlayerLanguage;
@@ -58,6 +59,7 @@ public class StatsDisplay {
 
         ItemStack border = new ItemStack(Items.BLACK_STAINED_GLASS_PANE);
         border.set(DataComponentTypes.CUSTOM_NAME, Text.empty());
+        border.set(DataComponentTypes.TOOLTIP_DISPLAY, new TooltipDisplayComponent(true, ReferenceSortedSets.emptySet()));
 
         for (int i = 0; i < 9; i++) {
             inv.setStack(i, border);
@@ -168,21 +170,10 @@ public class StatsDisplay {
 
         stack.set(DataComponentTypes.CUSTOM_NAME, name);
 
-        stack.set(DataComponentTypes.ATTRIBUTE_MODIFIERS, stack.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT).withShowInTooltip(false));
-
-        DyedColorComponent dyedColorComponent = stack.get(DataComponentTypes.DYED_COLOR);
-
-        if (dyedColorComponent != null) {
-            stack.set(DataComponentTypes.DYED_COLOR, dyedColorComponent.withShowInTooltip(false));
-        }
-
-        stack.set(DataComponentTypes.HIDE_ADDITIONAL_TOOLTIP, Unit.INSTANCE);
-
-        UnbreakableComponent unbreakableComponent = stack.get(DataComponentTypes.UNBREAKABLE);
-
-        if (unbreakableComponent != null) {
-            stack.set(DataComponentTypes.UNBREAKABLE, unbreakableComponent.withShowInTooltip(false));
-        }
+        stack.set(DataComponentTypes.TOOLTIP_DISPLAY, stack.getOrDefault(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT)
+                .with(DataComponentTypes.ATTRIBUTE_MODIFIERS, true)
+                .with(DataComponentTypes.DYED_COLOR, true)
+                .with(DataComponentTypes.UNBREAKABLE, true));
 
         List<Text> lore = new ArrayList<>();
         if (entry.getType() == MCStats.EntryType.GROUP) {
