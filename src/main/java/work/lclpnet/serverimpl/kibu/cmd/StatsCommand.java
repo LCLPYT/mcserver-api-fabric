@@ -5,10 +5,10 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.Component;
 import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.kibu.inv.type.KibuInventory;
 import work.lclpnet.lclpnetwork.facade.MCStats;
@@ -40,38 +40,38 @@ public class StatsCommand extends PlatformCommand<Boolean> implements StatsComma
         registrar.registerCommand(command());
     }
 
-    private LiteralArgumentBuilder<ServerCommandSource> command() {
-        return CommandManager.literal(getName())
+    private LiteralArgumentBuilder<CommandSourceStack> command() {
+        return Commands.literal(getName())
                 .executes(this::showOwnStats)
-                .then(CommandManager.argument("player", StringArgumentType.word())
+                .then(Commands.argument("player", StringArgumentType.word())
                         .suggests(PlayerNameSuggestionProvider.getInstance())
                         .executes(this::showStats));
     }
 
-    private int showOwnStats(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        ServerPlayerEntity player = ctx.getSource().getPlayerOrThrow();
+    private int showOwnStats(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
 
-        execute(player.getUuid().toString(), new Object[0]);
+        execute(player.getUUID().toString(), new Object[0]);
 
         return 1;
     }
 
-    private int showStats(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        ServerPlayerEntity player = ctx.getSource().getPlayerOrThrow();
+    private int showStats(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
 
         String target = StringArgumentType.getString(ctx, "player");
 
-        execute(player.getUuid().toString(), new Object[]{ target });
+        execute(player.getUUID().toString(), new Object[]{ target });
 
         return 1;
     }
 
     @Override
     public void openStats(String invokerUuid, String targetUuid, MCMessage title, MCStats targetStats) {
-        final ServerPlayerEntity invoker = server.getPlayerManager().getPlayer(UUID.fromString(invokerUuid));
+        final ServerPlayer invoker = server.getPlayerList().getPlayer(UUID.fromString(invokerUuid));
         if (invoker == null) throw new NullPointerException("Invoker is null");
 
-        Text titleText = Text.literal(getPlatformBridge().convertMessage(title, invoker).getString());
+        Component titleText = Component.literal(getPlatformBridge().convertMessage(title, invoker).getString());
 
         var entries = new ArrayList<>(targetStats.getStats());
         MCStats.Entry mainEntry = targetStats.getModule("general");

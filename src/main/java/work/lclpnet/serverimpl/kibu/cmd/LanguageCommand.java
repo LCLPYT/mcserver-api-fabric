@@ -4,9 +4,9 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
 import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.serverapi.MCServerAPI;
 import work.lclpnet.serverapi.cmd.LanguageCommandScheme;
@@ -29,30 +29,30 @@ public class LanguageCommand extends PlatformCommand<Boolean> implements Languag
         registrar.registerCommand(command("lang"));
     }
 
-    private LiteralArgumentBuilder<ServerCommandSource> command(String name) {
+    private LiteralArgumentBuilder<CommandSourceStack> command(String name) {
         final ServerCache cache = getContext().getCache();
 
-        return CommandManager.literal(name)
+        return Commands.literal(name)
                 .executes(this::getLanguage)
-                .then(CommandManager.argument("language", StringArgumentType.word())
+                .then(Commands.argument("language", StringArgumentType.word())
                         .suggests(new LanguageSuggestionProvider(cache))
                         .executes(this::setLanguage));
     }
 
-    private int getLanguage(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        ServerPlayerEntity player = ctx.getSource().getPlayerOrThrow();
+    private int getLanguage(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
 
-        execute(player.getUuid().toString(), new Object[0]);
+        execute(player.getUUID().toString(), new Object[0]);
 
         return 1;
     }
 
-    private int setLanguage(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        ServerPlayerEntity player = ctx.getSource().getPlayerOrThrow();
+    private int setLanguage(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
 
         String language = StringArgumentType.getString(ctx, "language");
 
-        execute(player.getUuid().toString(), new Object[]{ language });
+        execute(player.getUUID().toString(), new Object[]{ language });
 
         return 1;
     }

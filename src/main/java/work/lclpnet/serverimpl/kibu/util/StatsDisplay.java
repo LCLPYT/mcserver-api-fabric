@@ -2,20 +2,20 @@ package work.lclpnet.serverimpl.kibu.util;
 
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.objects.ReferenceSortedSets;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.LoreComponent;
-import net.minecraft.component.type.TooltipDisplayComponent;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.Registries;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.text.Texts;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.InvalidIdentifierException;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.ChatFormatting;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.ResourceLocationException;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import work.lclpnet.kibu.access.PlayerLanguage;
@@ -40,8 +40,8 @@ public class StatsDisplay {
         this.logger = logger;
     }
 
-    public KibuInventory createStatsInv(Text title, MCStats.Entry mainEntry, List<MCStats.Entry> items, int page,
-                                        ServerPlayerEntity viewer, StatsManager.StatsInventory parent) {
+    public KibuInventory createStatsInv(Component title, MCStats.Entry mainEntry, List<MCStats.Entry> items, int page,
+                                        ServerPlayer viewer, StatsManager.StatsInventory parent) {
         int itemsPerRow = 4;
         int rowsPerPage = 4;
         int rowStartIndex = 1, columnSpacing = 1;
@@ -58,22 +58,22 @@ public class StatsDisplay {
         statsInv.setParent(parent);
 
         ItemStack border = new ItemStack(Items.BLACK_STAINED_GLASS_PANE);
-        border.set(DataComponentTypes.CUSTOM_NAME, Text.empty());
-        border.set(DataComponentTypes.TOOLTIP_DISPLAY, new TooltipDisplayComponent(true, ReferenceSortedSets.emptySet()));
+        border.set(DataComponents.CUSTOM_NAME, Component.empty());
+        border.set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(true, ReferenceSortedSets.emptySet()));
 
         for (int i = 0; i < 9; i++) {
-            inv.setStack(i, border);
+            inv.setItem(i, border);
         }
 
         for (int i = slots - 9; i < slots; i++) {
-            inv.setStack(i, border);
+            inv.setItem(i, border);
         }
 
         for (int i = 9; i < slots - 9; i = (i % 9 == 0 ? i + 8 : i + 1)) {
-            inv.setStack(i, border);
+            inv.setItem(i, border);
         }
 
-        inv.setStack(4, getItem(mainEntry, true, viewer, statsInv));
+        inv.setItem(4, getItem(mainEntry, true, viewer, statsInv));
 
         int minIdx = itemsPerPage * page;
         int maxIdx = Math.min(minIdx + itemsPerPage, items.size());
@@ -86,7 +86,7 @@ public class StatsDisplay {
 
             int rowFirst = currentContentRow * 9;
             int rowColumn = rowStartIndex + currentContentColumn * (1 + columnSpacing);
-            inv.setStack(rowFirst + rowColumn, getItem(entry, false, viewer, statsInv));
+            inv.setItem(rowFirst + rowColumn, getItem(entry, false, viewer, statsInv));
 
             if (++currentContentColumn >= 4) {
                 currentContentColumn = 0;
@@ -95,23 +95,23 @@ public class StatsDisplay {
         }
 
         if (pagesRequired > 1) {
-            inv.setStack(slots - 5, getPageItem(viewer, page, pagesRequired));
+            inv.setItem(slots - 5, getPageItem(viewer, page, pagesRequired));
 
             if (page > 0) {
                 ItemStack prevPage = getPrevPageItem(viewer);
-                inv.setStack(slots - 9, prevPage);
+                inv.setItem(slots - 9, prevPage);
                 statsInv.setPrevPageItem(prevPage);
             }
             if (page < pagesRequired - 1) {
                 ItemStack nextPage = getNextPageItem(viewer);
-                inv.setStack(slots - 1, nextPage);
+                inv.setItem(slots - 1, nextPage);
                 statsInv.setNextPageItem(nextPage);
             }
         }
 
         if (mainEntry.getType() == MCStats.EntryType.GROUP) {
             ItemStack back = getBackItem(viewer);
-            inv.setStack(0, back);
+            inv.setItem(0, back);
             statsInv.setBackItem(back);
         }
 
@@ -120,15 +120,15 @@ public class StatsDisplay {
         return inv;
     }
 
-    private ItemStack getBackItem(ServerPlayerEntity viewer) {
+    private ItemStack getBackItem(ServerPlayer viewer) {
         ItemStack stack = new ItemStack(Items.ARROW);
 
-        stack.set(DataComponentTypes.CUSTOM_NAME, translations.translateText(viewer, "stats.back").formatted(Formatting.BLUE));
+        stack.set(DataComponents.CUSTOM_NAME, translations.translateText(viewer, "stats.back").formatted(ChatFormatting.BLUE));
 
         return stack;
     }
 
-    private ItemStack getPageItem(ServerPlayerEntity viewer, int page, int pagesRequired) {
+    private ItemStack getPageItem(ServerPlayer viewer, int page, int pagesRequired) {
         page += 1;
 
         ItemStack stack = new ItemStack(Items.PAPER);
@@ -139,52 +139,52 @@ public class StatsDisplay {
 
         String content = translations.translate(viewer, "stats.page.current", page, pagesRequired);
 
-        stack.set(DataComponentTypes.CUSTOM_NAME, Text.literal(content).formatted(Formatting.AQUA));
+        stack.set(DataComponents.CUSTOM_NAME, Component.literal(content).withStyle(ChatFormatting.AQUA));
 
         return stack;
     }
 
-    private ItemStack getNextPageItem(ServerPlayerEntity viewer) {
+    private ItemStack getNextPageItem(ServerPlayer viewer) {
         ItemStack stack = new ItemStack(Items.EMERALD_BLOCK);
 
-        stack.set(DataComponentTypes.CUSTOM_NAME, translations.translateText(viewer, "stats.page.next").formatted(Formatting.GREEN));
+        stack.set(DataComponents.CUSTOM_NAME, translations.translateText(viewer, "stats.page.next").formatted(ChatFormatting.GREEN));
 
         return stack;
     }
 
-    private ItemStack getPrevPageItem(ServerPlayerEntity viewer) {
+    private ItemStack getPrevPageItem(ServerPlayer viewer) {
         ItemStack stack = new ItemStack(Items.REDSTONE_BLOCK);
 
-        stack.set(DataComponentTypes.CUSTOM_NAME, translations.translateText(viewer, "stats.page.prev").formatted(Formatting.RED));
+        stack.set(DataComponents.CUSTOM_NAME, translations.translateText(viewer, "stats.page.prev").formatted(ChatFormatting.RED));
 
         return stack;
     }
 
-    private ItemStack getItem(MCStats.Entry entry, boolean mainEntry, ServerPlayerEntity viewer, StatsManager.StatsInventory statsInv) {
+    private ItemStack getItem(MCStats.Entry entry, boolean mainEntry, ServerPlayer viewer, StatsManager.StatsInventory statsInv) {
         Item item = getIconItem(entry);
         ItemStack stack = new ItemStack(item);
 
-        Formatting displayNameColor = getFormatting(entry);
-        Text name = Text.literal(entry.getTitle()).formatted(displayNameColor, Formatting.BOLD)
-                .styled(style -> style.withItalic(false));
+        ChatFormatting displayNameColor = getFormatting(entry);
+        Component name = Component.literal(entry.getTitle()).withStyle(displayNameColor, ChatFormatting.BOLD)
+                .withStyle(style -> style.withItalic(false));
 
-        stack.set(DataComponentTypes.CUSTOM_NAME, name);
+        stack.set(DataComponents.CUSTOM_NAME, name);
 
-        stack.set(DataComponentTypes.TOOLTIP_DISPLAY, stack.getOrDefault(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT)
-                .with(DataComponentTypes.ATTRIBUTE_MODIFIERS, true)
-                .with(DataComponentTypes.DYED_COLOR, true)
-                .with(DataComponentTypes.UNBREAKABLE, true));
+        stack.set(DataComponents.TOOLTIP_DISPLAY, stack.getOrDefault(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT)
+                .withHidden(DataComponents.ATTRIBUTE_MODIFIERS, true)
+                .withHidden(DataComponents.DYED_COLOR, true)
+                .withHidden(DataComponents.UNBREAKABLE, true));
 
-        List<Text> lore = new ArrayList<>();
+        List<Component> lore = new ArrayList<>();
         if (entry.getType() == MCStats.EntryType.GROUP) {
             if (!mainEntry) {
-                lore.add(translations.translateText(viewer, "stats.entry.open_group").formatted(Formatting.YELLOW));
+                lore.add(translations.translateText(viewer, "stats.entry.open_group").formatted(ChatFormatting.YELLOW));
             }
         } else {
             Map<String, MCStats.Value> properties = entry.getProperties();
 
             if (properties == null) {
-                lore.add(translations.translateText(viewer, "stats.entry.none").formatted(Formatting.YELLOW, Formatting.ITALIC));
+                lore.add(translations.translateText(viewer, "stats.entry.none").formatted(ChatFormatting.YELLOW, ChatFormatting.ITALIC));
             } else {
                 for (var e : properties.entrySet()) {
                     String key = e.getKey();
@@ -193,13 +193,13 @@ public class StatsDisplay {
                     String keyTranslation = translations.translate(viewer, String.format("stat.%s.%s", entry.getName().toLowerCase(Locale.ROOT), key));
                     String valString = getValueAsText(value, viewer);
 
-                    lore.add(Text.literal(keyTranslation.concat(": ")).formatted(Formatting.GREEN)
-                            .append(Text.literal(valString).formatted(Formatting.YELLOW)));
+                    lore.add(Component.literal(keyTranslation.concat(": ")).withStyle(ChatFormatting.GREEN)
+                            .append(Component.literal(valString).withStyle(ChatFormatting.YELLOW)));
                 }
             }
         }
 
-        stack.set(DataComponentTypes.LORE, new LoreComponent(Lists.transform(lore, t -> Texts.setStyleIfAbsent(t.copy(), Style.EMPTY.withItalic(false)))));
+        stack.set(DataComponents.LORE, new ItemLore(Lists.transform(lore, t -> ComponentUtils.mergeStyles(t.copy(), Style.EMPTY.withItalic(false)))));
 
         if (!mainEntry && entry.getType() == MCStats.EntryType.GROUP) {
             statsInv.setItemStackGroup(stack, entry);
@@ -209,15 +209,15 @@ public class StatsDisplay {
     }
 
     @NotNull
-    private static Formatting getFormatting(MCStats.Entry entry) {
-        final Formatting displayNameColor;
+    private static ChatFormatting getFormatting(MCStats.Entry entry) {
+        final ChatFormatting displayNameColor;
 
         if (entry.getType() == MCStats.EntryType.GENERAL) {
-            displayNameColor = Formatting.AQUA;
+            displayNameColor = ChatFormatting.AQUA;
         } else if (entry.getType() == MCStats.EntryType.GROUP) {
-            displayNameColor = Formatting.GREEN;
+            displayNameColor = ChatFormatting.GREEN;
         } else {
-            displayNameColor = Formatting.GOLD;
+            displayNameColor = ChatFormatting.GOLD;
         }
         return displayNameColor;
     }
@@ -230,16 +230,16 @@ public class StatsDisplay {
             return Items.BOOK;
         }
 
-        final Identifier identifier;
+        final ResourceLocation identifier;
 
         try {
-            identifier = Identifier.of(minecraftId);
-        } catch (InvalidIdentifierException e) {
+            identifier = ResourceLocation.parse(minecraftId);
+        } catch (ResourceLocationException e) {
             logger.error("Invalid identifier {}", minecraftId, e);
             return Items.BOOK;
         }
 
-        Item item = Registries.ITEM.get(identifier);
+        Item item = BuiltInRegistries.ITEM.getValue(identifier);
 
         if (item == Items.AIR) {
             return Items.BOOK;
@@ -248,7 +248,7 @@ public class StatsDisplay {
         return item;
     }
 
-    private String getValueAsText(MCStats.Value value, ServerPlayerEntity viewer) {
+    private String getValueAsText(MCStats.Value value, ServerPlayer viewer) {
         if (value.getType() != MCStats.ValueType.DATE) {
             return value.getValueAsFormattedString();
         }

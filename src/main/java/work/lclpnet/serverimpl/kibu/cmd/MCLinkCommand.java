@@ -3,9 +3,9 @@ package work.lclpnet.serverimpl.kibu.cmd;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
 import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.serverapi.MCServerAPI;
 import work.lclpnet.serverapi.cmd.MCLinkCommandScheme;
@@ -23,15 +23,15 @@ public class MCLinkCommand extends PlatformCommand<Boolean> implements MCLinkCom
         registrar.registerCommand(command());
     }
 
-    private LiteralArgumentBuilder<ServerCommandSource> command() {
-        return CommandManager.literal(getName())
+    private LiteralArgumentBuilder<CommandSourceStack> command() {
+        return Commands.literal(getName())
                 .executes(this::exec);
     }
 
-    private int exec(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        ServerPlayerEntity player = ctx.getSource().getPlayerOrThrow();
+    private int exec(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
 
-        execute(player.getUuid().toString(), new Object[0]);
+        execute(player.getUUID().toString(), new Object[0]);
 
         return 1;
     }

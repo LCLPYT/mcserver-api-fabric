@@ -6,9 +6,9 @@
 
 package work.lclpnet.serverimpl.kibu.util;
 
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import work.lclpnet.lclpnetwork.facade.MCStats;
 
@@ -19,21 +19,21 @@ import java.util.WeakHashMap;
 
 public class StatsManager {
 
-    private final WeakHashMap<Inventory, StatsInventory> statsInventories = new WeakHashMap<>();
+    private final WeakHashMap<Container, StatsInventory> statsInventories = new WeakHashMap<>();
 
-    public void markAsStats(Inventory inv, StatsInventory statsInventory) {
+    public void markAsStats(Container inv, StatsInventory statsInventory) {
         statsInventories.put(inv, statsInventory);
     }
 
     @Nullable
-    public StatsInventory getStatsInventory(Inventory inv) {
+    public StatsInventory getStatsInventory(Container inv) {
         return statsInventories.get(inv);
     }
 
     public static class StatsInventory {
 
         private final int page;
-        private final Text title;
+        private final Component title;
         private final MCStats.Entry mainEntry;
         private final List<MCStats.Entry> items;
         private final Map<ItemStack, MCStats.Entry> groups = new HashMap<>();
@@ -42,7 +42,7 @@ public class StatsManager {
         private ItemStack backItem = null;
         private StatsInventory parent = null;
 
-        public StatsInventory(int page, Text title, MCStats.Entry mainEntry, List<MCStats.Entry> items) {
+        public StatsInventory(int page, Component title, MCStats.Entry mainEntry, List<MCStats.Entry> items) {
             this.page = page;
             this.title = title;
             this.mainEntry = mainEntry;
@@ -53,7 +53,7 @@ public class StatsManager {
             return page;
         }
 
-        public Text getTitle() {
+        public Component getTitle() {
             return title;
         }
 

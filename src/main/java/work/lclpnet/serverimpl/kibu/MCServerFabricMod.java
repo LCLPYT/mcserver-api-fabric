@@ -79,7 +79,7 @@ public class MCServerFabricMod implements DedicatedServerModInitializer, MCServe
         HookContainer hooks = new HookContainer();
         hooks.registerHooks(new MCServerListener(serverCache, configManager, statsManager, statsDisplay, logger));
 
-        final FabricPlatformBridge platformBridge = new FabricPlatformBridge(server.getPlayerManager(), translations, logger);
+        final FabricPlatformBridge platformBridge = new FabricPlatformBridge(server.getPlayerList(), translations, logger);
         final MCServerAPI api = networkHandler.getApi().orElse(null);
 
         if (api == null) return;

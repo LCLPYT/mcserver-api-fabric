@@ -1,9 +1,9 @@
 package work.lclpnet.serverimpl.kibu.util;
 
-import net.minecraft.server.PlayerManager;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.serverapi.msg.MCMessage;
@@ -15,11 +15,11 @@ import java.util.concurrent.CompletableFuture;
 
 public class FabricPlatformBridge implements IPlatformBridge {
 
-    private final PlayerManager playerManager;
+    private final PlayerList playerManager;
     private final Logger logger;
     private final FabricMCMessageImpl messageSerializer;
 
-    public FabricPlatformBridge(PlayerManager playerManager, Translations translations, Logger logger) {
+    public FabricPlatformBridge(PlayerList playerManager, Translations translations, Logger logger) {
         this.playerManager = playerManager;
         this.logger = logger;
         this.messageSerializer = new FabricMCMessageImpl(translations);
@@ -28,28 +28,28 @@ public class FabricPlatformBridge implements IPlatformBridge {
     @Override
     public void sendMessageTo(String playerUuid, MCMessage msg) {
         UUID uuid = UUID.fromString(playerUuid);
-        ServerPlayerEntity player = playerManager.getPlayer(uuid);
+        ServerPlayer player = playerManager.getPlayer(uuid);
 
         if (player == null) {
             logger.error("There is no player with UUID '{}' online!", playerUuid);
             return;
         }
 
-        Text message = convertMessage(msg, player);
+        Component message = convertMessage(msg, player);
 
-        player.sendMessage(message);
+        player.sendSystemMessage(message);
     }
 
-    public MutableText convertMessage(MCMessage msg, ServerPlayerEntity player) {
+    public MutableComponent convertMessage(MCMessage msg, ServerPlayer player) {
         return messageSerializer.convert(msg, player);
     }
 
     @Override
     public CompletableFuture<String> getPlayerNameByUUID(String uuid) {
-        ServerPlayerEntity online = playerManager.getPlayer(uuid);
+        ServerPlayer online = playerManager.getPlayerByName(uuid);
 
         if (online != null) {
-            return CompletableFuture.completedFuture(online.getNameForScoreboard());
+            return CompletableFuture.completedFuture(online.getScoreboardName());
         }
 
         return MojangAPI.getUsernameByUUID(uuid);
@@ -57,10 +57,10 @@ public class FabricPlatformBridge implements IPlatformBridge {
 
     @Override
     public CompletableFuture<String> getPlayerUUIDByName(String name) {
-        ServerPlayerEntity online = playerManager.getPlayer(name);
+        ServerPlayer online = playerManager.getPlayerByName(name);
 
         if (online != null) {
-            return CompletableFuture.completedFuture(online.getUuid().toString());
+            return CompletableFuture.completedFuture(online.getUUID().toString());
         }
 
         return MojangAPI.getUUIDByUsername(name);

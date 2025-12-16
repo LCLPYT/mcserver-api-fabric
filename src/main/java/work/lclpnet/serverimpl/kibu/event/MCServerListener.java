@@ -1,9 +1,9 @@
 package work.lclpnet.serverimpl.kibu.event;
 
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.server.level.ServerPlayer;
 import org.slf4j.Logger;
 import work.lclpnet.kibu.hook.HookListenerModule;
 import work.lclpnet.kibu.hook.HookRegistrar;
@@ -52,26 +52,26 @@ public class MCServerListener implements HookListenerModule {
         });
     }
 
-    private void onJoin(ServerPlayerEntity player) {
+    private void onJoin(ServerPlayer player) {
         updateLastSeen(player, true);
     }
 
-    private void onQuit(ServerPlayerEntity player) {
+    private void onQuit(ServerPlayer player) {
         updateLastSeen(player, false)
                 .exceptionally(ignored -> null)
-                .thenRun(() -> serverCache.dropAllCachesFor(player.getUuid().toString()));
+                .thenRun(() -> serverCache.dropAllCachesFor(player.getUUID().toString()));
     }
 
     private void onModifyInventory(PlayerInventoryHooks.ClickEvent event) {
-        if (event.action() != SlotActionType.PICKUP) return;
+        if (event.action() != ClickType.PICKUP) return;
 
-        Inventory inventory = event.inventory();
+        Container inventory = event.inventory();
         if (inventory == null) return;
 
         var statsInv = statsManager.getStatsInventory(inventory);
         if (statsInv == null) return;
 
-        ServerPlayerEntity player = event.player();
+        ServerPlayer player = event.player();
 
         ItemStack stack = event.clickedStack();
         if (stack == null) return;
@@ -133,10 +133,10 @@ public class MCServerListener implements HookListenerModule {
         }
     }
 
-    private CompletableFuture<Void> updateLastSeen(ServerPlayerEntity player, boolean forceLoadPlayer) {
+    private CompletableFuture<Void> updateLastSeen(ServerPlayer player, boolean forceLoadPlayer) {
         NetworkHandler networkHandler = MCServerFabric.getInstance().getNetworkHandler();
 
-        String uuid = player.getUuid().toString();
+        String uuid = player.getUUID().toString();
 
         Optional<MCServerAPI> optApi = networkHandler.getApi();
 
@@ -156,7 +156,7 @@ public class MCServerListener implements HookListenerModule {
             return null;
         }).thenAccept(res -> {
             if (res == null) {
-                logger.warn("Could not update last seen for player '{}'.", player.getNameForScoreboard());
+                logger.warn("Could not update last seen for player '{}'.", player.getScoreboardName());
             }
         });
     }

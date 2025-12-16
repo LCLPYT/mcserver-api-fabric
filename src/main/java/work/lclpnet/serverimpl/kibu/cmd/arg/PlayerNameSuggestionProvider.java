@@ -4,21 +4,21 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.CommandSource;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
 
 import java.util.concurrent.CompletableFuture;
 
-public class PlayerNameSuggestionProvider implements SuggestionProvider<ServerCommandSource> {
+public class PlayerNameSuggestionProvider implements SuggestionProvider<CommandSourceStack> {
 
     protected PlayerNameSuggestionProvider() {}
 
     @Override
-    public CompletableFuture<Suggestions> getSuggestions(CommandContext<ServerCommandSource> context, SuggestionsBuilder builder) {
+    public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) {
         MinecraftServer server = context.getSource().getServer();
 
-        CommandSource.suggestMatching(server.getPlayerManager().getPlayerNames(), builder);
+        SharedSuggestionProvider.suggest(server.getPlayerList().getPlayerNamesArray(), builder);
 
         return builder.buildFuture();
     }

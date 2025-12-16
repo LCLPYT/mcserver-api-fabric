@@ -1,8 +1,8 @@
 package work.lclpnet.serverimpl.kibu.util;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.PlayerManager;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.server.level.ServerPlayer;
 import work.lclpnet.kibu.access.PlayerLanguage;
 import work.lclpnet.kibu.translate.hook.LanguageChangedCallback;
 import work.lclpnet.lclpnetwork.facade.MCPlayer;
@@ -22,11 +22,11 @@ public class FabricServerCache extends ServerCache {
     public void cachePlayer(MCPlayer player) {
         super.cachePlayer(player);
 
-        PlayerManager playerManager = server.getPlayerManager();
+        PlayerList playerManager = server.getPlayerList();
         if (playerManager == null) return;
 
         UUID uuid = UUID.fromString(player.getUuid());
-        ServerPlayerEntity serverPlayer = playerManager.getPlayer(uuid);
+        ServerPlayer serverPlayer = playerManager.getPlayer(uuid);
 
         if (serverPlayer == null) return;
 

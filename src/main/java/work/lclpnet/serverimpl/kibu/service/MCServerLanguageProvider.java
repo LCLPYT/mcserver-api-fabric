@@ -1,6 +1,6 @@
 package work.lclpnet.serverimpl.kibu.service;
 
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 import work.lclpnet.kibu.translate.pref.LanguagePreferenceProvider;
 import work.lclpnet.lclpnetwork.facade.MCPlayer;
@@ -14,12 +14,12 @@ public final class MCServerLanguageProvider implements LanguagePreferenceProvide
     private static final AtomicReference<ServerCache> staticCache = new AtomicReference<>(null);
 
     @Override
-    public Optional<String> getLanguagePreference(ServerPlayerEntity player) {
+    public Optional<String> getLanguagePreference(ServerPlayer player) {
         ServerCache serverCache = staticCache.get();
 
         if (serverCache == null) return Optional.empty();
 
-        String uuid = player.getUuid().toString();
+        String uuid = player.getUUID().toString();
         MCPlayer mcPlayer = serverCache.getPlayer(uuid);
 
         if (mcPlayer == null) return Optional.empty();
