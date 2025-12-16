@@ -14,8 +14,8 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.ChatFormatting;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.ResourceLocationException;
+import net.minecraft.resources.Identifier;
+import net.minecraft.IdentifierException;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import work.lclpnet.kibu.access.PlayerLanguage;
@@ -230,11 +230,11 @@ public class StatsDisplay {
             return Items.BOOK;
         }
 
-        final ResourceLocation identifier;
+        final Identifier identifier;
 
         try {
-            identifier = ResourceLocation.parse(minecraftId);
-        } catch (ResourceLocationException e) {
+            identifier = Identifier.parse(minecraftId);
+        } catch (IdentifierException e) {
             logger.error("Invalid identifier {}", minecraftId, e);
             return Items.BOOK;
         }
