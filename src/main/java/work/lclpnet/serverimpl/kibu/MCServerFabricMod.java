@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import work.lclpnet.kibu.cmd.impl.CommandContainer;
 import work.lclpnet.kibu.cmd.type.CommandRegistrar;
 import work.lclpnet.kibu.hook.HookContainer;
-import work.lclpnet.kibu.hook.world.ServerWorldReadyCallback;
+import work.lclpnet.kibu.hook.level.ServerWorldReadyCallback;
 import work.lclpnet.kibu.translate.Translations;
 import work.lclpnet.serverapi.MCServerAPI;
 import work.lclpnet.serverapi.util.ServerCache;

@@ -1,8 +1,8 @@
 package work.lclpnet.serverimpl.kibu.event;
 
 import net.minecraft.world.Container;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.inventory.ClickType;
 import net.minecraft.server.level.ServerPlayer;
 import org.slf4j.Logger;
 import work.lclpnet.kibu.hook.HookListenerModule;
@@ -63,7 +63,7 @@ public class MCServerListener implements HookListenerModule {
     }
 
     private void onModifyInventory(PlayerInventoryHooks.ClickEvent event) {
-        if (event.action() != ClickType.PICKUP) return;
+        if (event.action() != ContainerInput.PICKUP) return;
 
         Container inventory = event.inventory();
         if (inventory == null) return;
