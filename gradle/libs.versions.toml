@@ -1,0 +1,35 @@
+[versions]
+minecraft = "26.1.2"
+fabric-api = "0.147.0+26.1.2"
+fabric-loader = "0.19.2"
+fabric-loom = "1.16-SNAPSHOT"
+gradle-build-tools = "1.7.0"
+java = "25"
+kibu = "0.154.0+26.1"
+json = "20231013"
+jetbrains-annotations = "24.1.0"
+json-config4j = "1.0.0"
+lclpnetwork-api = "1.2.0"
+lclpstorage = "1.0.0"
+translations4j = "2.11.0"
+mcserver-api-base = "0.13.1"
+
+[plugins]
+fabric-loom = { id = "net.fabricmc.fabric-loom", version.ref = "fabric-loom" }
+java = { id = "java" }
+maven-publish = { id = "maven-publish" }
+gradle-build-utils = { id = "gradle-build-utils", version.ref = "gradle-build-tools" }
+
+[libraries]
+minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
+fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
+fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
+fabric-loader-junit = { module = "net.fabricmc:fabric-loader-junit", version.ref = "fabric-loader" }
+kibu = { module = "work.lclpnet.mods.kibu:kibu", version.ref = "kibu" }
+json = { module = "org.json:json", version.ref = "json" }
+jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
+json-config4j = { module = "work.lclpnet:json-config4j", version.ref = "json-config4j" }
+lclpnetwork-api = { module = "work.lclpnet:lclpnetwork-api", version.ref = "lclpnetwork-api" }
+lclpstorage = { module = "work.lclpnet:lclpstorage", version.ref = "lclpstorage" }
+translations4j = { module = "work.lclpnet:translations4j", version.ref = "translations4j" }
+mcserver-api-base = { module = "work.lclpnet.mcserver-api:mcserver-api-base", version.ref = "mcserver-api-base" }

@@ -1,19 +1,23 @@
+import org.apache.tools.ant.filters.ReplaceTokens
 import work.lclpnet.build.task.GithubDeploymentTask
 
 plugins {
-    id 'java'
-    id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
-    id 'maven-publish'
-    id 'gradle-build-utils' version '1.7.0'
+    alias(libs.plugins.java)
+    alias(libs.plugins.fabric.loom)
+    alias(libs.plugins.maven.publish)
+    alias(libs.plugins.gradle.build.utils)
 }
 
 Properties props = buildUtils.loadProperties('publish.properties')
 
 group = project.maven_group
-version = "${project.mod_version}+${project.minecraft_version}"
+version = "${project.mod_version}+${libs.versions.minecraft.get()}"
+
+def modId = project.mod_id
+def javaVersion = libs.versions.java.get().toInteger()
 
 base {
-    archivesName = project.archives_base_name
+    archivesName = modId
 }
 
 repositories {
@@ -31,26 +35,35 @@ configurations {
 }
 
 dependencies {
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings loom.officialMojangMappings()
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    minecraft(libs.minecraft)
+    implementation(libs.fabric.loader)
+    implementation(libs.fabric.api)
 
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    modImplementation "work.lclpnet.mods.kibu:kibu:${project.kibu_version}"
+    def includeImpl = { dep ->
+        include(dep)
+        implementation(dep)
+    }
 
-    implementation 'org.json:json:20231013'
-    compileOnly 'org.jetbrains:annotations:24.1.0'
+    implementation(libs.kibu)
 
-    include(implementation('work.lclpnet:json-config4j:1.0.0'))
-    include(implementation("work.lclpnet:lclpnetwork-api:${project.lclpnetwork_api_version}"))
-    include(implementation("work.lclpnet:lclpstorage:${project.lclpstorage_version}"))
-    implementation("work.lclpnet:translations4j:${project.translations4j_version}")
-    include(localRuntime(compileOnly("work.lclpnet:translations4j:${project.translations4j_version}:network")))
+    implementation(libs.json)
+    compileOnly(libs.jetbrains.annotations)
 
-    provide(localRuntime(compileOnly("work.lclpnet.mcserver-api:mcserver-api-base:${project.mcserver_api_base_version}")))
+    includeImpl(libs.json.config4j)
+    includeImpl(libs.lclpnetwork.api)
+    includeImpl(libs.lclpstorage)
+    implementation(libs.translations4j)
+
+    compileOnly(variantOf(libs.translations4j) { classifier('network') })
+    localRuntime(variantOf(libs.translations4j) { classifier('network') })
+    include(variantOf(libs.translations4j) { classifier('network') })
+
+    compileOnly(libs.mcserver.api.base)
+    localRuntime(libs.mcserver.api.base)
+    provide(libs.mcserver.api.base)
 
     // test dependencies
-    testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
+    testImplementation(libs.fabric.loader.junit)
 }
 
 loom {
@@ -69,24 +82,30 @@ test {
 java {
     withSourcesJar()
 
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.toVersion(javaVersion)
+    targetCompatibility = JavaVersion.toVersion(javaVersion)
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.release.set(21)
+    it.options.release.set(javaVersion)
 }
 
 processResources {
-    // replace placeholders in resources
-    inputs.property "version", project.version
-    inputs.property "loader_version", project.loader_version
-    inputs.property "minecraft_compat", project.minecraft_compat
+    def tokens = [
+            "version": project.version.toString(),
+            "loader_version": libs.versions.fabric.loader.get(),
+            "minecraft_compat": project.minecraft_compat,
+            "java_version": javaVersion.toString()
+    ]
+
+    inputs.properties(tokens)
 
     filesMatching("fabric.mod.json") {
-        expand "version": project.version,
-                "loader_version": project.loader_version,
-                "minecraft_compat": project.minecraft_compat
+        expand(tokens)
+    }
+
+    filesMatching("*.mixins.json") {
+        filter(ReplaceTokens, beginToken: '${', endToken: '}', tokens: tokens)
     }
 }
 
@@ -105,7 +124,7 @@ jar {
 def env = System.getenv()
 
 tasks.register("github", GithubDeploymentTask) {
-    dependsOn tasks.remapJar
+    dependsOn tasks.jar
 
     config {
         token = env.get("GITHUB_TOKEN")
@@ -113,11 +132,11 @@ tasks.register("github", GithubDeploymentTask) {
     }
 
     release {
-        title = "[$project.minecraft_version] $project.name $project.version"
+        title = "[${libs.versions.minecraft.get()}] $project.name $project.version"
         tag = project.version
     }
 
-    assets.add(tasks.remapJar.archiveFile.get())
+    assets.add(tasks.jar.archiveFile.get())
 }
 
 publishing {
@@ -125,7 +144,7 @@ publishing {
 
     publications {
         create("mavenJava", MavenPublication) {
-            artifactId = project.archives_base_name
+            artifactId = project.base.archivesName.get()
 
             from components.java
 
