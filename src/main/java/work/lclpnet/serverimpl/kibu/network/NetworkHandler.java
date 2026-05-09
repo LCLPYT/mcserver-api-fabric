@@ -64,7 +64,7 @@ public class NetworkHandler {
 
         logger.info("Logged into LCLPNetwork successfully");
 
-        ServerLifecycleEvents.SERVER_STOPPING.register(_ -> executor.shutdown());
+        ServerLifecycleEvents.SERVER_STOPPED.register(_ -> executor.shutdown());
     }
 
     private String loadToken(MCSConfig config) throws IOException {
