@@ -1,5 +1,6 @@
 package work.lclpnet.serverimpl.kibu.network;
 
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import org.slf4j.Logger;
 import work.lclpnet.lclpnetwork.api.APIAccess;
 import work.lclpnet.lclpnetwork.api.APIAuthAccess;
@@ -22,7 +23,9 @@ public class NetworkHandler {
 
     private final ConfigAccess configAccess;
     private final Logger logger;
-    private final ExecutorService executor = Executors.newFixedThreadPool(10);
+    private final ExecutorService executor = Executors.newThreadPerTaskExecutor(Thread.ofVirtual()
+            .name("mc-server-api Network Worker")
+            .factory());
     private MCServerAPI api;
 
     public NetworkHandler(ConfigAccess configAccess, Logger logger) {
@@ -60,6 +63,8 @@ public class NetworkHandler {
         api = new MCServerAPI(authAccess);
 
         logger.info("Logged into LCLPNetwork successfully");
+
+        ServerLifecycleEvents.SERVER_STOPPING.register(_ -> executor.shutdown());
     }
 
     private String loadToken(MCSConfig config) throws IOException {
