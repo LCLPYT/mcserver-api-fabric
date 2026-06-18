@@ -8,6 +8,7 @@ import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.chat.Style;
@@ -57,7 +58,7 @@ public class StatsDisplay {
         final StatsManager.StatsInventory statsInv = new StatsManager.StatsInventory(page, title, mainEntry, items);
         statsInv.setParent(parent);
 
-        ItemStack border = new ItemStack(Items.BLACK_STAINED_GLASS_PANE);
+        ItemStack border = new ItemStack(Items.STAINED_GLASS_PANE.pick(DyeColor.BLACK));
         border.set(DataComponents.CUSTOM_NAME, Component.empty());
         border.set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(true, ReferenceSortedSets.emptySet()));
 
@@ -123,7 +124,7 @@ public class StatsDisplay {
     private ItemStack getBackItem(ServerPlayer viewer) {
         ItemStack stack = new ItemStack(Items.ARROW);
 
-        stack.set(DataComponents.CUSTOM_NAME, translations.translateText(viewer, "stats.back").formatted(ChatFormatting.BLUE));
+        stack.set(DataComponents.CUSTOM_NAME, translations.translateText(viewer, "stats.back").withStyle(ChatFormatting.BLUE));
 
         return stack;
     }
@@ -147,7 +148,7 @@ public class StatsDisplay {
     private ItemStack getNextPageItem(ServerPlayer viewer) {
         ItemStack stack = new ItemStack(Items.EMERALD_BLOCK);
 
-        stack.set(DataComponents.CUSTOM_NAME, translations.translateText(viewer, "stats.page.next").formatted(ChatFormatting.GREEN));
+        stack.set(DataComponents.CUSTOM_NAME, translations.translateText(viewer, "stats.page.next").withStyle(ChatFormatting.GREEN));
 
         return stack;
     }
@@ -155,7 +156,7 @@ public class StatsDisplay {
     private ItemStack getPrevPageItem(ServerPlayer viewer) {
         ItemStack stack = new ItemStack(Items.REDSTONE_BLOCK);
 
-        stack.set(DataComponents.CUSTOM_NAME, translations.translateText(viewer, "stats.page.prev").formatted(ChatFormatting.RED));
+        stack.set(DataComponents.CUSTOM_NAME, translations.translateText(viewer, "stats.page.prev").withStyle(ChatFormatting.RED));
 
         return stack;
     }
@@ -178,13 +179,13 @@ public class StatsDisplay {
         List<Component> lore = new ArrayList<>();
         if (entry.getType() == MCStats.EntryType.GROUP) {
             if (!mainEntry) {
-                lore.add(translations.translateText(viewer, "stats.entry.open_group").formatted(ChatFormatting.YELLOW));
+                lore.add(translations.translateText(viewer, "stats.entry.open_group").withStyle(ChatFormatting.YELLOW));
             }
         } else {
             Map<String, MCStats.Value> properties = entry.getProperties();
 
             if (properties == null) {
-                lore.add(translations.translateText(viewer, "stats.entry.none").formatted(ChatFormatting.YELLOW, ChatFormatting.ITALIC));
+                lore.add(translations.translateText(viewer, "stats.entry.none").withStyle(ChatFormatting.YELLOW, ChatFormatting.ITALIC));
             } else {
                 for (var e : properties.entrySet()) {
                     String key = e.getKey();
